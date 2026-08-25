@@ -404,4 +404,27 @@ const sizeInput=document.querySelector('#textSize');const sizeRow=sizeInput?.clo
 function applyTextSize(){const value=`${textSize}vw`;stage.style.setProperty('--text-size',value);textOverlay.style.setProperty('--text-size',value);textOverlay.querySelectorAll('.roll-line,.overlay-text,.tile-text-inner').forEach(el=>{el.style.fontSize=value;});const output=document.querySelector('#textSizeValue');if(output)output.textContent=value;}
 sizeInput.oninput=()=>{textSize=+sizeInput.value;applyTextSize();renderText();queueProjectSave();};
 applyTextSize();
+</script>
+<style>
+.text-overlay .roll-line,.text-overlay .overlay-text,.tile-text-inner{letter-spacing:var(--text-tracking,-.02em);}
+.text-overlay .roll-line,.text-overlay .overlay-text,.tile-text-grid{opacity:var(--text-alpha,1);}
+.text-overlay .roll-line,.text-overlay .overlay-text{position:relative;transform:translate(calc((var(--text-x,50) - 50) * 1%),calc((var(--text-y,50) - 50) * 1%));}
+.tile-text-inner{transform:translate(calc((var(--text-x,50) - 50) * 1%),calc((var(--text-y,50) - 50) * 1%));}
+.text-position-controls{display:grid;gap:8px;padding-top:4px;}
+.text-position-controls input[type=range]{width:145px;accent-color:#8ea63e;}
+.text-position-controls .text-value{color:#8ea63e;font-variant-numeric:tabular-nums;}
+@media(max-width:720px){.text-position-controls input[type=range]{width:130px;}}
+</style>
+<script>
+const TEXT_EDIT_VERSION='v2026.08.25.15';const textEditBadge=document.querySelector('.build-version');if(textEditBadge)textEditBadge.textContent=`BUILD ${TEXT_EDIT_VERSION}`;
+let textLetterSpacing=-.02,textX=50,textY=50,textOpacity=1;
+const positionBox=document.createElement('div');positionBox.className='text-position-controls';positionBox.innerHTML=`<div class="row"><span>자간</span><span><input id="textLetterSpacing" type="range" min="-.08" max=".2" step=".01" value="-.02"><span class="text-value" id="textLetterSpacingValue">-0.02em</span></span></div><div class="row"><span>가로 위치</span><span><input id="textX" type="range" min="0" max="100" step="1" value="50"><span class="text-value" id="textXValue">50%</span></span></div><div class="row"><span>세로 위치</span><span><input id="textY" type="range" min="0" max="100" step="1" value="50"><span class="text-value" id="textYValue">50%</span></span></div><div class="row"><span>글자 투명도</span><span><input id="textOpacity" type="range" min="0" max="1" step=".01" value="1"><span class="text-value" id="textOpacityValue">100%</span></span></div>`;document.querySelector('.text-controls').append(positionBox);
+const textLetterInput=document.querySelector('#textLetterSpacing'),textXInput=document.querySelector('#textX'),textYInput=document.querySelector('#textY'),textOpacityInput=document.querySelector('#textOpacity');
+function applyTextLayout(){textOverlay.style.setProperty('--text-tracking',`${textLetterSpacing}em`);textOverlay.style.setProperty('--text-x',textX);textOverlay.style.setProperty('--text-y',textY);textOverlay.style.setProperty('--text-alpha',textOpacity);document.querySelector('#textLetterSpacingValue').textContent=`${textLetterSpacing.toFixed(2)}em`;document.querySelector('#textXValue').textContent=`${textX}%`;document.querySelector('#textYValue').textContent=`${textY}%`;document.querySelector('#textOpacityValue').textContent=`${Math.round(textOpacity*100)}%`;}
+function restartTextTimeline(){sequenceStartedAt=performance.now();lastTextWindowState='';renderText();scheduleGlobalTextStable();queueProjectSave();}
+textLetterInput.oninput=()=>{textLetterSpacing=+textLetterInput.value;applyTextLayout();restartTextTimeline()};textXInput.oninput=()=>{textX=+textXInput.value;applyTextLayout();restartTextTimeline()};textYInput.oninput=()=>{textY=+textYInput.value;applyTextLayout();restartTextTimeline()};textOpacityInput.oninput=()=>{textOpacity=+textOpacityInput.value;applyTextLayout();restartTextTimeline()};
+captionField.addEventListener('input',restartTextTimeline);
+document.querySelector('#textMode').addEventListener('change',restartTextTimeline);document.querySelector('#font').addEventListener('change',restartTextTimeline);document.querySelector('#textColor').addEventListener('input',restartTextTimeline);
+const textLayoutRenderBefore=renderText;renderText=function(){textLayoutRenderBefore();applyTextLayout();};
+applyTextLayout();render();
 </script></body></html>
