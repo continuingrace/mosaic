@@ -496,4 +496,109 @@ async function exportAllPhotos(){
   }catch(e){try{rec?.stop()}catch(_){ }alert('사진 전체를 영상으로 불러오지 못했습니다. 백업을 먼저 저장한 뒤 사진을 다시 복원해보세요.');}button.disabled=false;setTimeout(()=>bar.style.display='none',800);
 }
 document.querySelector('#export').onclick=exportAllPhotos;
-</script></body></html>
+</script>
+<style id="mosaic-motion-output-fix">
+.stage .backdrop{inset:0!important;transition:none!important;}
+.stage.flip .flip-safe{display:block!important;position:relative;z-index:1;opacity:0;perspective:none!important;transform-origin:center center;transform-style:flat!important;background-repeat:no-repeat;background-size:calc(var(--cols) * 100%) calc(var(--rows) * 100%);border-right:1px solid #0005;border-bottom:1px solid #0005;animation:flipSafeStable var(--motion-duration,1.5s) cubic-bezier(.22,.72,.25,1) both;animation-delay:var(--safe-delay,0s);}
+@keyframes flipSafeStable{0%{opacity:0;transform:scaleX(1)}12%{opacity:1}46%{transform:scaleX(.025);filter:brightness(1.35)}54%{transform:scaleX(.025);filter:brightness(1.35)}100%{opacity:1;transform:scaleX(1);filter:none}}
+.stage .flip-final{position:absolute!important;inset:0!important;z-index:1!important;display:block!important;opacity:1!important;animation:none!important;background-position:center!important;background-size:cover!important;background-repeat:no-repeat!important;}
+.text-overlay.roll>div{max-width:100%;display:flex;flex-direction:column;align-items:center;gap:0!important;}
+.text-overlay.roll .roll-line{display:flex!important;max-width:100%;flex-wrap:wrap;justify-content:center;white-space:pre-wrap;line-height:var(--text-leading,1.2)!important;letter-spacing:var(--text-tracking,-.02em)!important;}
+.text-overlay.roll .roll-char{flex:0 0 auto;min-width:.24em!important;letter-spacing:inherit!important;}
+.text-overlay.tile-text .tile-text-cell{animation:flipSafeStable var(--motion-duration,1.5s) cubic-bezier(.22,.72,.25,1) both!important;animation-delay:var(--safe-delay,0s)!important;animation-play-state:paused;}
+.text-overlay.tile-text.text-enter .tile-text-cell{animation-play-state:running;}
+.text-overlay.tile-text .tile-text-inner{letter-spacing:var(--text-tracking,-.02em)!important;white-space:pre-wrap!important;overflow-wrap:anywhere;line-height:var(--text-leading,1.2)!important;}
+.motion-export-status{display:block;min-height:16px;margin:8px 0 0;color:#77847e;font-size:10px;line-height:1.45;}
+.motion-export-status a{color:#6d8d22;font-weight:700;text-decoration:underline;}
+</style>
+<script>
+const MOTION_OUTPUT_VERSION='v2026.08.25.20';
+const motionOutputBadge=document.querySelector('.build-version');
+if(motionOutputBadge)motionOutputBadge.textContent='BUILD '+MOTION_OUTPUT_VERSION;
+const MOTION_TRANSITION_MS=1500,MOTION_HOLD_MS=650;
+let motionSettleTimer=0,motionTileTimers=[],motionTextDomKey='',motionExportRunning=false;
+const motionExportStatus=document.createElement('div');
+motionExportStatus.className='motion-export-status';motionExportStatus.setAttribute('aria-live','polite');
+document.querySelector('#progress').after(motionExportStatus);
+function motionClamp(v,min,max){return Math.max(min,Math.min(max,v));}
+function motionEase(v){const p=motionClamp(v,0,1);return 1-Math.pow(1-p,3);}
+function motionFlipTotalMs(){return (MOTION_TRANSITION_MS+550)/(Number(speed)||1);}
+function motionSegmentMs(){return (MOTION_HOLD_MS+MOTION_TRANSITION_MS+550+MOTION_HOLD_MS)/(Number(speed)||1);}
+function clearMotionLayers(){clearTimeout(motionSettleTimer);motionTileTimers.forEach(clearTimeout);motionTileTimers=[];stage.querySelectorAll('.flip-safe,.flip-final').forEach(n=>n.remove());}
+function renderTextMotionStable(){
+  const key=[textValue,textStyle,mode,textFont,textSize,textColor,textLineHeight,textLetterSpacing,textX,textY,textOpacity].join('|');
+  if(!textValue.trim()){motionTextDomKey='';textOverlay.innerHTML='';textOverlay.className='text-overlay';scheduleGlobalTextStable();return;}
+  if(key!==motionTextDomKey||!textOverlay.children.length){
+    motionTextDomKey=key;textOverlay.innerHTML='';
+    textOverlay.style.setProperty('--text-size',String(textSize)+'vw');textOverlay.style.setProperty('--text-color',textColor);textOverlay.style.setProperty('--text-font',textFont);
+    if(textStyle==='roll'&&mode==='flip'){
+      textOverlay.className='text-overlay tile-text roll';const grid=document.createElement('div');grid.className='tile-text-grid';
+      for(let i=0;i<cols*rows;i++){const x=i%cols,y=Math.floor(i/cols),cell=document.createElement('div'),inner=document.createElement('div');cell.className='tile-text-cell';cell.style.setProperty('--safe-delay',(delayFor(i,x,y)/(Number(speed)||1))+'s');inner.className='tile-text-inner';inner.style.setProperty('--tx',x);inner.style.setProperty('--ty',y);inner.textContent=textValue;cell.append(inner);grid.append(cell);}textOverlay.append(grid);
+    }else if(textStyle==='roll'){
+      textOverlay.className='text-overlay roll';const wrap=document.createElement('div');textValue.split('\\n').forEach((line,index)=>addRollLine(wrap,line,index));textOverlay.append(wrap);
+    }else{textOverlay.className='text-overlay puzzle';const line=document.createElement('div');line.className='overlay-text';line.textContent=textValue;textOverlay.append(line);}
+  }
+  applyTextSize();applyTextLayout();syncTextLeading();scheduleGlobalTextStable();
+}
+renderText=renderTextMotionStable;
+const renderBaseForMotionOutput=originalRender;
+function renderMotionOutput(){
+  clearMotionLayers();renderBaseForMotionOutput();if(typeof decorateThumbs==='function')decorateThumbs();stage.querySelectorAll('.flip-tile').forEach(n=>n.remove());
+  if(mode!=='flip'||photos.length<2)return;
+  const current=photos[active%photos.length],next=photos[(active+1)%photos.length],currentUrl=current.displayUrl||current.url,nextUrl=next.displayUrl||next.url,speedValue=Number(speed)||1;
+  stage.style.setProperty('--motion-duration',(MOTION_TRANSITION_MS/speedValue)+'ms');
+  for(let i=0;i<cols*rows;i++){const x=i%cols,y=Math.floor(i/cols),tile=document.createElement('div'),delay=delayFor(i,x,y)/speedValue;tile.className='flip-safe';tile.style.setProperty('--safe-delay',delay+'s');tile.style.backgroundImage='url("'+currentUrl+'")';tile.style.backgroundPosition=(cols===1?0:x/(cols-1)*100)+'% '+(rows===1?0:y/(rows-1)*100)+'%';stage.append(tile);motionTileTimers.push(setTimeout(()=>{tile.style.backgroundImage='url("'+nextUrl+'")';},Math.round(delay*1000+(MOTION_TRANSITION_MS/speedValue)*.5)));}
+  motionSettleTimer=setTimeout(()=>{const finalLayer=document.createElement('div');finalLayer.className='flip-final';finalLayer.style.backgroundImage='url("'+nextUrl+'")';stage.append(finalLayer);stage.querySelectorAll('.flip-safe,.flip-tile').forEach(n=>n.remove());},Math.round(motionFlipTotalMs()));
+}
+render=renderMotionOutput;
+function autoplayMotionOutput(){clearInterval(timer);if(playing&&photos.length>1)timer=setInterval(()=>{active=(active+1)%photos.length;render();},motionSegmentMs());}
+autoplay=autoplayMotionOutput;
+function drawMotionTextLine(ctx,line,cx,y,tracking,rollTime,fontSize){
+  const chars=Array.from(line||' '),widths=chars.map(ch=>ctx.measureText(ch===' '?' ':ch).width),total=widths.reduce((sum,width)=>sum+width,0)+Math.max(0,chars.length-1)*tracking;let x=cx-total/2;
+  chars.forEach((char,index)=>{const progress=rollTime===null?1:motionEase((rollTime-Math.min(index*.018,.48))/.56);ctx.save();ctx.globalAlpha*=progress;ctx.fillText(char===' '?' ':char,x,y+(1-progress)*fontSize*1.04);ctx.restore();x+=widths[index]+tracking;});
+}
+function drawMotionText(ctx,elapsedMs,width,height){
+  if(!textValue.trim())return;const start=Math.max(0,Number(textStart)||0)*1000,end=start+Math.max(.1,Number(textDuration)||0)*1000;if(elapsedMs<start||elapsedMs>=end)return;
+  const fontSize=Math.max(24,Math.round(width*(Number(textSize)||5)/100)),lineHeight=Math.max(fontSize*.8,fontSize*(Number(textLineHeight)||1.2)),lines=String(textValue).split('\\n'),baseY=height*(Number(textY)||50)/100-(lines.length-1)*lineHeight/2,tracking=fontSize*(Number(textLetterSpacing)||0),rollTime=textStyle==='roll'?(elapsedMs-start)/1000:null;
+  ctx.save();ctx.globalAlpha=Number(textOpacity);ctx.fillStyle=textColor;ctx.font='800 '+fontSize+'px '+textFont;ctx.textAlign='left';ctx.textBaseline='middle';ctx.shadowColor='#0009';ctx.shadowBlur=Math.max(3,fontSize*.15);lines.forEach((line,index)=>drawMotionTextLine(ctx,line,width*(Number(textX)||50)/100,baseY+index*lineHeight,tracking,rollTime,fontSize));ctx.restore();
+}
+function drawMotionLook(ctx,width,height){
+  if(Number(filmOpacity)>0){ctx.save();ctx.globalAlpha=Number(filmOpacity);ctx.fillStyle=filmColor;ctx.fillRect(0,0,width,height);ctx.restore();}
+  if(Number(grainOpacity)>0){ctx.save();ctx.globalAlpha=Number(grainOpacity)*.18;for(let i=0;i<220;i++){ctx.fillStyle=i%2?'#fff':'#000';ctx.fillRect(Math.random()*width,Math.random()*height,1,1);}ctx.restore();}
+}
+function drawMotionImage(ctx,image,width,height){fitImage(ctx,image,width,height);}
+function drawMosaicTransition(ctx,from,to,width,height,timeMs){
+  const speedValue=Number(speed)||1,duration=MOTION_TRANSITION_MS/speedValue,cellW=width/cols,cellH=height/rows;drawMotionImage(ctx,from,width,height);
+  for(let i=0;i<cols*rows;i++){const x=i%cols,y=Math.floor(i/cols),delay=delayFor(i,x,y)*1000/speedValue,local=motionClamp((timeMs-delay)/duration,0,1);if(local<=0)continue;const source=mode==='flip'?(local<.5?from:to):to;ctx.save();ctx.beginPath();ctx.rect(x*cellW,y*cellH,cellW+.6,cellH+.6);ctx.clip();if(mode==='flip'){const scaleX=Math.max(.025,Math.abs(Math.cos(local*Math.PI)));ctx.translate(x*cellW+cellW/2,0);ctx.scale(scaleX,1);ctx.translate(-(x*cellW+cellW/2),0);drawMotionImage(ctx,source,width,height);}else{ctx.globalAlpha=motionEase(local);drawMotionImage(ctx,to,width,height);}ctx.restore();}
+}
+function outputCanvasSize(){if(ratio===1.7778)return {width:1920,height:1080};if(ratio===.5625)return {width:1080,height:1920};if(ratio===.8)return {width:1080,height:1350};return {width:1080,height:1080};}
+function exportMimeType(){const choices=['video/mp4;codecs="avc1.42E01E"','video/mp4','video/webm;codecs=vp9','video/webm'];return choices.find(type=>window.MediaRecorder&&MediaRecorder.isTypeSupported(type))||'';}
+function saveMotionBlob(blob,type){
+  const ext=type.indexOf('mp4')>-1?'mp4':'webm',name='mosaic-motion-'+Date.now()+'.'+ext,url=URL.createObjectURL(blob),anchor=document.createElement('a');anchor.href=url;anchor.download=name;anchor.style.display='none';document.body.append(anchor);try{anchor.click();}catch(error){}
+  const link=document.createElement('a');link.href=url;link.download=name;link.textContent='파일 저장';link.onclick=()=>setTimeout(()=>URL.revokeObjectURL(url),30000);motionExportStatus.textContent=ext==='mp4'?'MP4가 준비되었습니다. 자동 저장이 열리지 않으면 ':'브라우저가 MP4 녹화를 지원하지 않아 WebM으로 준비되었습니다. ';motionExportStatus.append(link);setTimeout(()=>anchor.remove(),0);setTimeout(()=>URL.revokeObjectURL(url),120000);
+}
+function waitForMotionFrame(deadline){return new Promise(resolve=>setTimeout(resolve,Math.max(0,deadline-performance.now())));}
+async function exportAllPhotosMotion(){
+  if(motionExportRunning)return;const button=document.querySelector('#export'),bar=document.querySelector('#progress'),fill=bar.querySelector('i'),type=exportMimeType();
+  if(!type){alert('이 브라우저에서는 영상 녹화를 지원하지 않습니다. 최신 Safari 또는 Chrome에서 다시 시도해주세요.');return;}if(!photos.length){alert('저장할 사진을 먼저 추가해주세요.');return;}
+  motionExportRunning=true;button.disabled=true;bar.style.display='block';fill.style.width='0%';motionExportStatus.textContent='사진을 준비하고 있습니다…';let recorder;
+  try{
+    await rebuildCrops();const ordered=[...photos.slice(active),...photos.slice(0,active)],images=await Promise.all(ordered.map(photo=>loadSequenceImage(photo))),size=outputCanvasSize(),canvas=document.createElement('canvas');canvas.width=size.width;canvas.height=size.height;
+    const ctx=canvas.getContext('2d',{alpha:false}),stream=canvas.captureStream(30),track=stream.getVideoTracks()[0],chunks=[];recorder=new MediaRecorder(stream,{mimeType:type,videoBitsPerSecond:14000000});recorder.ondataavailable=event=>{if(event.data&&event.data.size)chunks.push(event.data);};const stopped=new Promise((resolve,reject)=>{recorder.onstop=resolve;recorder.onerror=()=>reject(recorder.error||new Error('recording failed'));});
+    const speedValue=Number(speed)||1,holdFrames=Math.max(1,Math.round(MOTION_HOLD_MS/speedValue/1000*30)),transitionFrames=Math.max(2,Math.round(motionFlipTotalMs()/1000*30)),totalFrames=holdFrames+(images.length-1)*(transitionFrames+holdFrames);let frameNumber=0,elapsedMs=0,nextDeadline=performance.now();
+    const paint=draw=>{ctx.fillStyle='#17211e';ctx.fillRect(0,0,size.width,size.height);draw();drawMotionLook(ctx,size.width,size.height);drawMotionText(ctx,elapsedMs,size.width,size.height);};
+    const recordFrame=async()=>{if(track&&track.requestFrame)track.requestFrame();frameNumber++;if(frameNumber===1||frameNumber%4===0||frameNumber===totalFrames)fill.style.width=Math.round(frameNumber/totalFrames*100)+'%';elapsedMs+=1000/30;nextDeadline+=1000/30;await waitForMotionFrame(nextDeadline);};
+    paint(()=>drawMotionImage(ctx,images[0],size.width,size.height));recorder.start(250);
+    for(let frame=0;frame<holdFrames;frame++){paint(()=>drawMotionImage(ctx,images[0],size.width,size.height));await recordFrame();}
+    for(let index=0;index<images.length-1;index++){const from=images[index],to=images[index+1];for(let frame=0;frame<transitionFrames;frame++){const time=frame/(transitionFrames-1)*motionFlipTotalMs();paint(()=>drawMosaicTransition(ctx,from,to,size.width,size.height,time));await recordFrame();}for(let frame=0;frame<holdFrames;frame++){paint(()=>drawMotionImage(ctx,to,size.width,size.height));await recordFrame();}}
+    recorder.stop();await stopped;if(!chunks.length)throw new Error('empty recording');saveMotionBlob(new Blob(chunks,{type:type}),type);
+  }catch(error){try{if(recorder&&recorder.state!=='inactive')recorder.stop();}catch(stopError){}console.error(error);motionExportStatus.textContent='저장에 실패했습니다. 사진을 한 번에 너무 많이 올렸다면 작업 백업 후 사진 수를 나누어 다시 시도해주세요.';alert('영상 저장에 실패했습니다. 아래 안내를 확인해주세요.');}
+  finally{button.disabled=false;motionExportRunning=false;setTimeout(()=>bar.style.display='none',900);}
+}
+document.querySelector('#export').onclick=exportAllPhotosMotion;
+function normalizeMotionTracking(){textLetterSpacing=motionClamp(Number(textLetterSpacing)||0,-.04,.08);if(textLetterInput){textLetterInput.min='-.04';textLetterInput.max='.08';textLetterInput.value=String(textLetterSpacing);}applyTextLayout();}
+normalizeMotionTracking();
+textLetterInput.oninput=()=>{textLetterSpacing=motionClamp(Number(textLetterInput.value)||0,-.04,.08);normalizeMotionTracking();motionTextDomKey='';renderText();queueProjectSave();};
+render();autoplay();
+</script>
+</body></html>
