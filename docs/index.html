@@ -278,4 +278,22 @@ async function exportVideoHQ(){
   rec.stop();await done;const blob=new Blob(chunks,{type}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`mosaic-motion-${Date.now()}.${type.startsWith('video/mp4')?'mp4':'webm'}`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);button.disabled=false;setTimeout(()=>bar.style.display='none',800);
 }
 document.querySelector('#export').onclick=exportVideoHQ;
+</script>
+<script>
+const TIMELINE_VERSION='v2026.08.25.09';const timelineBadge=document.querySelector('.build-version');if(timelineBadge)timelineBadge.textContent=`BUILD ${TIMELINE_VERSION}`;
+let sequenceStartedAt=performance.now(),globalTextTimers=[];
+function scheduleGlobalTextWindow(){
+  globalTextTimers.forEach(clearTimeout);globalTextTimers=[];
+  if(!textValue.trim()){textOverlay.style.opacity='';return;}
+  const elapsed=(performance.now()-sequenceStartedAt)/1000,start=textStart,end=textStart+textDuration;
+  const reveal=()=>{textOverlay.style.opacity='1';textOverlay.classList.remove('text-enter');void textOverlay.offsetWidth;textOverlay.classList.add('text-enter');};
+  const hide=()=>{textOverlay.style.opacity='0';};
+  if(elapsed<start){hide();globalTextTimers.push(setTimeout(reveal,(start-elapsed)*1000));globalTextTimers.push(setTimeout(hide,(end-elapsed)*1000));}
+  else if(elapsed<end){reveal();globalTextTimers.push(setTimeout(hide,(end-elapsed)*1000));}
+  else hide();
+}
+scheduleTextWindow=scheduleGlobalTextWindow;
+document.querySelector('#play').addEventListener('click',()=>{if(playing){sequenceStartedAt=performance.now();scheduleGlobalTextWindow();}});
+thumbs.addEventListener('click',event=>{if(event.target.closest('.thumb')&&!event.target.closest('.thumb-remove')){sequenceStartedAt=performance.now();scheduleGlobalTextWindow();}},true);
+render();
 </script></body></html>
