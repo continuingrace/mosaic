@@ -724,4 +724,36 @@ const MOTION_SEAM_VERSION='v2026.08.25.23';
 const motionSeamBadge=document.querySelector('.build-version');
 if(motionSeamBadge)motionSeamBadge.textContent='BUILD '+MOTION_SEAM_VERSION;
 </script>
+
+<style id="mosaic-motion-facing-flip">
+/* iOS-safe two-face hinge: neither source ever crosses its back side, so no mirrored photo can appear. */
+.stage.flip .flip-safe{box-shadow:inset -1px 0 rgb(12 18 16 / .42),inset 0 -1px rgb(12 18 16 / .42)!important;}
+.stage.flip .motion-flip-card{animation:none!important;transform:none!important;transform-style:flat!important;-webkit-transform-style:flat!important;}
+.stage.flip .motion-flip-face{backface-visibility:hidden!important;-webkit-backface-visibility:hidden!important;transform-origin:center center;will-change:transform,opacity;}
+.stage.flip .motion-flip-front{z-index:2;animation:motionFrontFold var(--card-flip-duration,1.75s) cubic-bezier(.2,.72,.22,1) both;animation-delay:var(--safe-delay,0s);}
+.stage.flip .motion-flip-back{z-index:1;transform:rotateY(-78deg)!important;animation:motionBackOpen var(--card-flip-duration,1.75s) cubic-bezier(.2,.72,.22,1) both;animation-delay:var(--safe-delay,0s);}
+@keyframes motionFrontFold{0%,39%{opacity:1;transform:rotateY(0deg);filter:none}50%{opacity:0;transform:rotateY(78deg);filter:brightness(.72)}100%{opacity:0;transform:rotateY(78deg)}}
+@keyframes motionBackOpen{0%,49%{opacity:0;transform:rotateY(-78deg);filter:brightness(.72)}61%{opacity:1;transform:rotateY(-26deg);filter:none}100%{opacity:1;transform:rotateY(0deg);filter:none}}
+</style>
+<script>
+const MOTION_FACING_FLIP_VERSION='v2026.08.25.24';
+const motionFacingBadge=document.querySelector('.build-version');
+if(motionFacingBadge)motionFacingBadge.textContent='BUILD '+MOTION_FACING_FLIP_VERSION;
+drawMosaicTransition=function(ctx,from,to,width,height,timeMs){
+  const speedValue=Number(speed)||1,duration=CARD_FLIP_MS/speedValue,cellW=width/cols,cellH=height/rows;
+  drawMotionImage(ctx,from,width,height);
+  for(let i=0;i<cols*rows;i++){
+    const x=i%cols,y=Math.floor(i/cols),delay=delayFor(i,x,y)*CARD_DELAY_SCALE*1000/speedValue,local=motionClamp((timeMs-delay)/duration,0,1);
+    if(local<=0)continue;
+    const outgoing=local<.5,face=outgoing?from:to,phase=outgoing?local*2:(local-.5)*2,scaleX=outgoing?1-phase*.86:.14+phase*.86;
+    const alpha=outgoing?1-phase:phase;
+    ctx.save();ctx.beginPath();ctx.rect(x*cellW,y*cellH,cellW+.6,cellH+.6);ctx.clip();
+    ctx.globalAlpha=motionEase(alpha);
+    ctx.translate(x*cellW+cellW/2,0);ctx.scale(scaleX,1);ctx.translate(-(x*cellW+cellW/2),0);
+    drawMotionImage(ctx,face,width,height);
+    ctx.restore();
+  }
+};
+render();autoplay();
+</script>
 </body></html>
