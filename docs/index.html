@@ -427,4 +427,30 @@ captionField.addEventListener('input',restartTextTimeline);
 document.querySelector('#textMode').addEventListener('change',restartTextTimeline);document.querySelector('#font').addEventListener('change',restartTextTimeline);document.querySelector('#textColor').addEventListener('input',restartTextTimeline);
 const textLayoutRenderBefore=renderText;renderText=function(){textLayoutRenderBefore();applyTextLayout();};
 applyTextLayout();render();
+</script>
+<script>
+const EXPORT_FIX_VERSION='v2026.08.25.16';const exportFixBadge=document.querySelector('.build-version');if(exportFixBadge)exportFixBadge.textContent=`BUILD ${EXPORT_FIX_VERSION}`;
+function loadVideoImage(source){return new Promise((resolve,reject)=>{const img=new Image();if(/^https?:/i.test(source))img.crossOrigin='anonymous';img.onload=()=>img.naturalWidth?resolve(img):reject(new Error('empty image'));img.onerror=()=>reject(new Error('image load failed'));img.src=source;});}
+async function exportVideoFixed(){
+  const button=document.querySelector('#export'),bar=document.querySelector('#progress'),fill=bar.querySelector('i'),type=mime();if(!type){alert('이 브라우저에서는 영상 녹화를 지원하지 않습니다.');return;}
+  button.disabled=true;bar.style.display='block';fill.style.width='0%';
+  try{
+    const fromPhoto=photos[active%photos.length],toPhoto=photos[(active+1)%photos.length];await rebuildCrops();
+    const from=await loadVideoImage(fromPhoto.displayUrl||fromPhoto.url),to=await loadVideoImage(toPhoto.displayUrl||toPhoto.url);
+    const canvas=document.createElement('canvas');canvas.width=ratio===.5625?1080:ratio===1.7778?1920:1080;canvas.height=ratio===1.7778?1080:ratio===.5625?1920:ratio===.8?1350:1080;
+    const ctx=canvas.getContext('2d'),stream=canvas.captureStream(30),rec=new MediaRecorder(stream,{mimeType:type,videoBitsPerSecond:12000000}),chunks=[];rec.ondataavailable=e=>e.data.size&&chunks.push(e.data);const done=new Promise(resolve=>rec.onstop=resolve);rec.start(100);
+    const duration=5200/speed,frames=Math.max(30,Math.round(duration/33)),cellW=canvas.width/cols,cellH=canvas.height/rows;
+    for(let f=0;f<frames;f++){
+      ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#17211e';ctx.fillRect(0,0,canvas.width,canvas.height);fitImage(ctx,from,canvas.width,canvas.height);const p=f/(frames-1),reveal=Math.min(1,p*1.35);
+      for(let i=0;i<cols*rows;i++){const x=i%cols,y=Math.floor(i/cols),d=Math.min(1,delayFor(i,x,y)/1.3),local=Math.max(0,Math.min(1,(reveal-d)/(1-d)));if(local>0){ctx.save();ctx.globalAlpha=local;ctx.beginPath();ctx.rect(x*cellW,y*cellH,cellW+.5,cellH+.5);ctx.clip();fitImage(ctx,to,canvas.width,canvas.height);ctx.restore();}}
+      if(filmOpacity>0){ctx.save();ctx.globalAlpha=filmOpacity;ctx.fillStyle=filmColor;ctx.fillRect(0,0,canvas.width,canvas.height);ctx.restore();}
+      if(grainOpacity>0){ctx.save();ctx.globalAlpha=grainOpacity*.22;for(let n=0;n<420;n++){ctx.fillStyle=Math.random()>.5?'#fff':'#000';ctx.fillRect(Math.random()*canvas.width,Math.random()*canvas.height,1,1);}ctx.restore();}
+      const elapsed=p*(duration/1000);if(textValue.trim()&&elapsed>=textStart&&elapsed<textStart+textDuration){ctx.save();ctx.globalAlpha=textOpacity;ctx.fillStyle=textColor;ctx.font=`800 ${Math.max(24,Math.round(canvas.width*textSize/100))}px ${textFont}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowColor='#0009';ctx.shadowBlur=16;const lines=textValue.split('\n'),lineGap=Math.max(30,Math.round(canvas.width*textSize/100*textLineHeight)),baseY=canvas.height*textY/100-(lines.length-1)*lineGap/2;lines.forEach((line,i)=>ctx.fillText(line,canvas.width*textX/100,baseY+i*lineGap));ctx.restore();}
+      fill.style.width=`${Math.round((f+1)/frames*100)}%`;await new Promise(r=>setTimeout(r,33));
+    }
+    rec.stop();await done;const blob=new Blob(chunks,{type}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`mosaic-motion-${Date.now()}.${type.startsWith('video/mp4')?'mp4':'webm'}`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  }catch(error){alert('사진을 영상으로 불러오지 못했습니다. 사진을 다시 추가한 뒤 시도해주세요.');}
+  button.disabled=false;setTimeout(()=>bar.style.display='none',800);
+}
+document.querySelector('#export').onclick=exportVideoFixed;
 </script></body></html>
