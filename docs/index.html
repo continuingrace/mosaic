@@ -713,4 +713,15 @@ drawMosaicTransition=function(ctx,from,to,width,height,timeMs){
 };
 render();autoplay();
 </script>
+
+<style id="mosaic-motion-seam-fix">
+.stage.flip .flip-safe,.stage.flip .motion-flip-face{border:0!important;}
+.stage.flip .flip-safe{box-shadow:inset -0.5px 0 rgb(0 0 0 / .34),inset 0 -0.5px rgb(0 0 0 / .34)!important;}
+.stage.flip .motion-flip-card{overflow:hidden;}
+</style>
+<script>
+const MOTION_SEAM_VERSION='v2026.08.25.23';
+const motionSeamBadge=document.querySelector('.build-version');
+if(motionSeamBadge)motionSeamBadge.textContent='BUILD '+MOTION_SEAM_VERSION;
+</script>
 </body></html>
