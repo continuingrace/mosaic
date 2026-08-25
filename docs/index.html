@@ -101,5 +101,29 @@ render=function(){
   }
 };
 render();
+</script>
+<style>
+.flip-final{position:absolute;inset:0;z-index:1;background-position:center;background-size:cover;background-repeat:no-repeat;opacity:0;animation:flipFinalIn .18s ease-out forwards;}
+@keyframes flipFinalIn{from{opacity:0}to{opacity:1}}
+</style>
+<script>
+// The tiles are transition-only. The settled state is always one complete image.
+clearTimeout(flipSettleTimer);
+const settledRender=render;
+render=function(){
+  clearTimeout(flipSettleTimer);
+  stage.querySelectorAll('.flip-final').forEach(layer=>layer.remove());
+  settledRender();
+  if(mode==='flip'&&photos.length>1){
+    const next=photos[(active+1)%photos.length];
+    flipSettleTimer=setTimeout(()=>{
+      const finalLayer=document.createElement('div');
+      finalLayer.className='flip-final';
+      finalLayer.style.backgroundImage=`url("${next.displayUrl||next.url}")`;
+      stage.append(finalLayer);
+      stage.querySelectorAll('.flip-tile').forEach(tile=>tile.remove());
+    },2150);
+  }
+};
+render();
 </script></body></html>
-
