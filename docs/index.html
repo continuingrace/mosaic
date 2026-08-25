@@ -315,4 +315,33 @@ textLineHeightInput.oninput=()=>{textLineHeight=+textLineHeightInput.value;docum
 const renderBeforeLeading=renderText;
 renderText=function(){renderBeforeLeading();syncTextLeading();const wrapper=textOverlay.querySelector('.text-overlay.roll>div');if(wrapper)wrapper.style.display='flex';};
 render();
+</script>
+<style>
+.save-status{margin-left:10px;color:#8ea63e;font-size:9px;letter-spacing:.06em;white-space:nowrap;}
+@media(max-width:720px){.save-status{font-size:8px;margin-left:6px;}}
+</style>
+<script>
+const SAVE_VERSION='v2026.08.25.11';const saveBadge=document.querySelector('.build-version');if(saveBadge)saveBadge.textContent=`BUILD ${SAVE_VERSION}`;
+const saveStatus=document.createElement('span');saveStatus.className='save-status';saveStatus.textContent='기기 자동 저장';document.querySelector('.top').append(saveStatus);
+const DB_NAME='mosaic-motion-projects',DB_VERSION=1,DB_STORE='project';let projectDb,saveTimer;
+function openProjectDb(){return new Promise((resolve,reject)=>{if(!window.indexedDB){reject(new Error('IndexedDB unavailable'));return}const req=indexedDB.open(DB_NAME,DB_VERSION);req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains(DB_STORE))req.result.createObjectStore(DB_STORE)};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)});}
+async function writeProject(){
+  if(!projectDb)return;const photoRecords=photos.map(p=>({name:p.name,url:p.demo?p.url:null,blob:p.file||null,demo:!!p.demo}));
+  const data={photos:photoRecords,active,ratio,mode,speed,cols,squareGrid,textValue,textStyle,textFont,textSize,textColor,textStart,textDuration,textLineHeight,filmColor,filmOpacity,grainOpacity,updatedAt:Date.now()};
+  try{await new Promise((resolve,reject)=>{const tx=projectDb.transaction(DB_STORE,'readwrite');tx.objectStore(DB_STORE).put(data,'current');tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});saveStatus.textContent='자동 저장됨';}catch(e){saveStatus.textContent='저장 공간 확인 필요';}
+}
+function queueProjectSave(){clearTimeout(saveTimer);saveStatus.textContent='저장 중…';saveTimer=setTimeout(writeProject,450);}
+async function restoreProject(){
+  try{projectDb=await openProjectDb();const data=await new Promise((resolve,reject)=>{const tx=projectDb.transaction(DB_STORE,'readonly'),req=tx.objectStore(DB_STORE).get('current');req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)});if(!data||!data.photos?.length){queueProjectSave();return;}
+    photos=data.photos.map(p=>p.blob?{url:URL.createObjectURL(p.blob),name:p.name,file:p.blob,demo:false}:{url:p.url,name:p.name,demo:!!p.demo});active=Math.min(data.active||0,photos.length-1);ratio=data.ratio||ratio;mode=data.mode||mode;speed=data.speed||speed;cols=data.cols||cols;squareGrid=!!data.squareGrid;textValue=data.textValue||'';textStyle=data.textStyle||textStyle;textFont=data.textFont||textFont;textSize=data.textSize||textSize;textColor=data.textColor||textColor;textStart=data.textStart??textStart;textDuration=data.textDuration??textDuration;textLineHeight=data.textLineHeight??textLineHeight;filmColor=data.filmColor||filmColor;filmOpacity=data.filmOpacity??filmOpacity;grainOpacity=data.grainOpacity??grainOpacity;
+    document.querySelector('#ratio').value=String(ratio);document.querySelector('#mode').value=mode;document.querySelector('#density').value=squareGrid?'square':String(cols);document.querySelector('#caption').value=textValue;document.querySelector('#font').value=textFont;document.querySelector('#textSize').value=textSize;document.querySelector('#textColor').value=textColor;document.querySelector('#textMode').value=textStyle;if(document.querySelector('#textStart'))document.querySelector('#textStart').value=textStart;if(document.querySelector('#textDuration'))document.querySelector('#textDuration').value=textDuration;if(document.querySelector('#textLineHeight'))document.querySelector('#textLineHeight').value=textLineHeight;if(document.querySelector('#filmColor'))document.querySelector('#filmColor').value=filmColor;if(document.querySelector('#filmOpacity'))document.querySelector('#filmOpacity').value=filmOpacity;if(document.querySelector('#grainOpacity'))document.querySelector('#grainOpacity').value=grainOpacity;
+    render();await rebuildCrops();autoplay();saveStatus.textContent='저장된 작업 복원됨';
+  }catch(e){saveStatus.textContent='기기 자동 저장';}
+}
+photos.forEach(p=>{if(!p.file&&!p.demo)p.demo=true});
+document.querySelector('#files').onchange=async e=>{const fs=[...e.target.files].filter(f=>f.type.startsWith('image/'));if(!fs.length)return;const customPhotos=photos.filter(p=>!p.demo);if(!customPhotos.length)photos=[];photos=[...photos,...fs.map(f=>({url:URL.createObjectURL(f),name:f.name,file:f,demo:false}))];active=Math.max(0,photos.length-fs.length);await rebuildCrops();render();autoplay();queueProjectSave();e.target.value='';};
+['#caption','#font','#textSize','#textColor','#textMode','#ratio','#mode','#density','#filmColor','#filmOpacity','#grainOpacity','#textStart','#textDuration','#textLineHeight'].forEach(sel=>{const el=document.querySelector(sel);if(el)el.addEventListener('input',queueProjectSave),el.addEventListener('change',queueProjectSave)});
+thumbs.addEventListener('click',()=>queueProjectSave());
+window.addEventListener('pagehide',()=>{clearTimeout(saveTimer);writeProject()});
+restoreProject();
 </script></body></html>
