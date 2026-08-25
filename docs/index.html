@@ -453,4 +453,12 @@ async function exportVideoFixed(){
   button.disabled=false;setTimeout(()=>bar.style.display='none',800);
 }
 document.querySelector('#export').onclick=exportVideoFixed;
+</script>
+<style>
+.play{right:26px!important;bottom:26px!important;width:44px;height:44px;z-index:8;}
+.note{left:24px;bottom:28px!important;}
+@media(max-width:720px){.stagebox{padding-bottom:18px;}.play{right:24px!important;bottom:30px!important;}.note{left:24px;bottom:32px!important;}}
+</style>
+<script>
+const BUTTON_VERSION='v2026.08.25.17';const buttonBadge=document.querySelector('.build-version');if(buttonBadge)buttonBadge.textContent=`BUILD ${BUTTON_VERSION}`;
 </script></body></html>
