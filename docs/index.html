@@ -653,4 +653,64 @@ drawMosaicTransition=function(ctx,from,to,width,height,timeMs){
 };
 render();autoplay();
 </script>
+
+<style id="mosaic-motion-card-flip">
+/* Fixed grid cells; only the two image faces inside each cell rotate. */
+.stage.flip .flip-safe{position:relative!important;overflow:hidden!important;perspective:780px!important;transform:none!important;filter:none!important;opacity:1!important;animation:none!important;background-repeat:no-repeat!important;background-size:calc(var(--cols) * 100%) calc(var(--rows) * 100%)!important;}
+.stage.flip .motion-flip-card{position:absolute;inset:0;transform-style:preserve-3d;-webkit-transform-style:preserve-3d;transform-origin:center center;animation:motionCardFlip var(--card-flip-duration,1.75s) cubic-bezier(.2,.72,.22,1) both;animation-delay:var(--safe-delay,0s);}
+.stage.flip .motion-flip-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;background-repeat:no-repeat;background-size:calc(var(--cols) * 100%) calc(var(--rows) * 100%);border-right:1px solid #0005;border-bottom:1px solid #0005;}
+.stage.flip .motion-flip-back{transform:rotateY(180deg);}
+@keyframes motionCardFlip{0%,9%{transform:rotateY(0deg);filter:none}47%{transform:rotateY(88deg);filter:brightness(1.28)}53%{transform:rotateY(92deg);filter:brightness(1.28)}91%,100%{transform:rotateY(180deg);filter:none}}
+</style>
+<script>
+const MOTION_CARD_FLIP_VERSION='v2026.08.25.22';
+const motionCardBadge=document.querySelector('.build-version');
+if(motionCardBadge)motionCardBadge.textContent='BUILD '+MOTION_CARD_FLIP_VERSION;
+const CARD_FLIP_MS=1750,CARD_DELAY_SCALE=1.25;
+motionFlipTotalMs=()=> (CARD_FLIP_MS+550*CARD_DELAY_SCALE)/(Number(speed)||1);
+motionSegmentMs=()=> (CARD_FLIP_MS+550*CARD_DELAY_SCALE+NO_JUMP_HOLD_MS)/(Number(speed)||1);
+function renderMotionCardFlip(){
+  clearMotionLayers();
+  renderBaseForMotionOutput();
+  if(typeof decorateThumbs==='function')decorateThumbs();
+  stage.querySelectorAll('.flip-tile,.flip-final').forEach(node=>node.remove());
+  if(mode!=='flip'||photos.length<2)return;
+  const currentPhoto=photos[active%photos.length],nextPhoto=photos[(active+1)%photos.length];
+  const currentUrl=currentPhoto.displayUrl||currentPhoto.url,nextUrl=nextPhoto.displayUrl||nextPhoto.url;
+  const speedValue=Number(speed)||1;
+  stage.style.setProperty('--card-flip-duration',(CARD_FLIP_MS/speedValue)+'ms');
+  for(let i=0;i<cols*rows;i++){
+    const x=i%cols,y=Math.floor(i/cols),tile=document.createElement('div');
+    const delay=delayFor(i,x,y)*CARD_DELAY_SCALE/speedValue;
+    const position=(cols===1?0:x/(cols-1)*100)+'% '+(rows===1?0:y/(rows-1)*100)+'%';
+    tile.className='flip-safe';
+    tile.style.setProperty('--safe-delay',delay+'s');
+    tile.style.backgroundImage='url("'+currentUrl+'")';
+    tile.style.backgroundPosition=position;
+    const card=document.createElement('div'),front=document.createElement('div'),back=document.createElement('div');
+    card.className='motion-flip-card';
+    front.className='motion-flip-face motion-flip-front';
+    back.className='motion-flip-face motion-flip-back';
+    front.style.backgroundImage='url("'+currentUrl+'")';front.style.backgroundPosition=position;
+    back.style.backgroundImage='url("'+nextUrl+'")';back.style.backgroundPosition=position;
+    card.append(front,back);tile.append(card);stage.append(tile);
+  }
+}
+render=renderMotionCardFlip;
+autoplay=autoplayMotionOutput;
+drawMosaicTransition=function(ctx,from,to,width,height,timeMs){
+  const speedValue=Number(speed)||1,duration=CARD_FLIP_MS/speedValue,cellW=width/cols,cellH=height/rows;
+  drawMotionImage(ctx,from,width,height);
+  for(let i=0;i<cols*rows;i++){
+    const x=i%cols,y=Math.floor(i/cols),delay=delayFor(i,x,y)*CARD_DELAY_SCALE*1000/speedValue,local=motionClamp((timeMs-delay)/duration,0,1);
+    if(local<=0)continue;
+    const face=local<.5?from:to,scaleX=Math.max(.022,Math.abs(Math.cos(local*Math.PI)));
+    ctx.save();ctx.beginPath();ctx.rect(x*cellW,y*cellH,cellW+.6,cellH+.6);ctx.clip();
+    ctx.translate(x*cellW+cellW/2,0);ctx.scale(scaleX,1);ctx.translate(-(x*cellW+cellW/2),0);
+    drawMotionImage(ctx,face,width,height);
+    ctx.restore();
+  }
+};
+render();autoplay();
+</script>
 </body></html>
