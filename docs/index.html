@@ -851,4 +851,67 @@ document.querySelector('#font').addEventListener('change',restartTextVisibleTime
 document.querySelector('#textColor').addEventListener('input',restartTextVisibleTimeline);
 render();autoplay();
 </script>
+
+<style id="mosaic-motion-roll-export">
+.text-overlay.roll .motion-roll-line{display:flex;flex-wrap:wrap;justify-content:center;max-width:100%;line-height:var(--text-leading,1.2);letter-spacing:var(--text-tracking,-.02em);}
+.text-overlay.roll .motion-roll-char{position:relative;display:inline-block;overflow:hidden;height:calc(var(--text-leading,1.2) * 1em);min-width:.22em;vertical-align:top;letter-spacing:inherit;}
+.text-overlay.roll .motion-roll-char>span{display:block;transform:translateY(108%);opacity:0;}
+.text-overlay.roll.text-enter .motion-roll-char>span{animation:motionTextRollIn .68s cubic-bezier(.16,.8,.35,1) both;animation-delay:min(calc(var(--roll-index) * .018s),.46s);}
+@keyframes motionTextRollIn{0%{transform:translateY(108%);opacity:0}100%{transform:translateY(0);opacity:1}}
+</style>
+<script>
+const MOTION_ROLL_EXPORT_VERSION='v2026.08.25.27';
+const motionRollExportBadge=document.querySelector('.build-version');
+if(motionRollExportBadge)motionRollExportBadge.textContent='BUILD '+MOTION_ROLL_EXPORT_VERSION;
+function makeStableRollLine(parent,text,lineIndex){
+  const line=document.createElement('div');
+  line.className='motion-roll-line';
+  Array.from(text||' ').forEach((character,index)=>{
+    const holder=document.createElement('span'),glyph=document.createElement('span');
+    holder.className='motion-roll-char';
+    holder.style.setProperty('--roll-index',Math.min(lineIndex*24+index,26));
+    glyph.textContent=character===' '?'\\u00a0':character;
+    holder.append(glyph);line.append(holder);
+  });
+  parent.append(line);
+}
+function renderTextStableRoll(){
+  const key=[textValue,textStyle,textFont,textSize,textColor,textLineHeight,textLetterSpacing,textX,textY,textOpacity].join('|');
+  if(!textValue.trim()){motionTextDomKey='';textOverlay.innerHTML='';textOverlay.className='text-overlay';textOverlay.style.opacity='0';return;}
+  if(key!==motionTextDomKey||!textOverlay.children.length){
+    motionTextDomKey=key;textOverlay.innerHTML='';
+    textOverlay.style.setProperty('--text-size',String(textSize)+'vw');textOverlay.style.setProperty('--text-color',textColor);textOverlay.style.setProperty('--text-font',textFont);
+    if(textStyle==='roll'){
+      textOverlay.className='text-overlay roll';
+      const wrap=document.createElement('div');
+      String(textValue).split('\\n').forEach((line,index)=>makeStableRollLine(wrap,line,index));
+      textOverlay.append(wrap);
+    }else{
+      textOverlay.className='text-overlay puzzle';
+      const line=document.createElement('div');line.className='overlay-text';line.textContent=String(textValue);textOverlay.append(line);
+    }
+  }
+  applyTextSize();applyTextLayout();syncTextLeading();scheduleGlobalTextStable();
+}
+renderText=renderTextStableRoll;
+drawMosaicTransition=function(ctx,from,to,width,height,timeMs){
+  const speedValue=Number(speed)||1,duration=CARD_FLIP_MS/speedValue,cellW=width/cols,cellH=height/rows,hingeRadians=76*Math.PI/180;
+  drawMotionImage(ctx,from,width,height);
+  for(let i=0;i<cols*rows;i++){
+    const x=i%cols,y=Math.floor(i/cols),delay=delayFor(i,x,y)*CARD_DELAY_SCALE*1000/speedValue,local=motionClamp((timeMs-delay)/duration,0,1);
+    if(local<=0)continue;
+    const outgoing=local<.5,phase=outgoing?local*2:(local-.5)*2,source=outgoing?from:to;
+    const scaleX=Math.cos(hingeRadians*(outgoing?phase:1-phase));
+    ctx.save();ctx.beginPath();ctx.rect(x*cellW,y*cellH,cellW+.6,cellH+.6);ctx.clip();
+    ctx.translate(x*cellW+cellW/2,0);ctx.scale(scaleX,1);ctx.translate(-(x*cellW+cellW/2),0);
+    if(Math.abs(scaleX)<.45)ctx.filter='brightness(.72)';
+    drawMotionImage(ctx,source,width,height);
+    ctx.restore();
+  }
+};
+function restartStableRollTimeline(){sequenceStartedAt=performance.now();lastTextWindowState='';motionTextDomKey='';renderText();queueProjectSave();}
+captionField.addEventListener('input',restartStableRollTimeline);
+document.querySelector('#textMode').addEventListener('change',restartStableRollTimeline);
+render();autoplay();
+</script>
 </body></html>
