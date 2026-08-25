@@ -999,4 +999,39 @@ document.querySelector('#font').onchange=event=>{textFont=event.target.value;res
 document.querySelector('#textColor').oninput=event=>{textColor=event.target.value;resetReliableTextTimeline();};
 render();autoplay();
 </script>
+
+<style id="mosaic-motion-save-sheet">
+.motion-export-status .motion-save-file{margin-left:6px;border:1px solid #8ea63e;background:#17211e;color:#d8ef79;padding:7px 10px;font:700 11px Arial,Helvetica,sans-serif;border-radius:2px;}
+</style>
+<script>
+const MOTION_SAVE_SHEET_VERSION='v2026.08.25.29';
+const motionSaveSheetBadge=document.querySelector('.build-version');
+if(motionSaveSheetBadge)motionSaveSheetBadge.textContent='BUILD '+MOTION_SAVE_SHEET_VERSION;
+let latestMotionExportFile=null;
+saveMotionBlob=function(blob,type){
+  const ext=type.indexOf('mp4')>-1?'mp4':'webm';
+  const name='mosaic-motion-'+Date.now()+'.'+ext;
+  const file=new File([blob],name,{type});
+  latestMotionExportFile=file;
+  motionExportStatus.textContent=ext==='mp4'?'영상이 준비되었습니다. ':'브라우저가 MP4 녹화를 지원하지 않아 WebM 영상이 준비되었습니다. ';
+  const saveButton=document.createElement('button');
+  saveButton.type='button';saveButton.className='motion-save-file';
+  saveButton.textContent='영상 저장 / 공유';
+  saveButton.onclick=async()=>{
+    try{
+      if(navigator.share&&navigator.canShare&&navigator.canShare({files:[latestMotionExportFile]})){
+        await navigator.share({files:[latestMotionExportFile],title:'Mosaic Motion'});
+        return;
+      }
+      const url=URL.createObjectURL(latestMotionExportFile),anchor=document.createElement('a');
+      anchor.href=url;anchor.download=latestMotionExportFile.name;anchor.style.display='none';
+      document.body.append(anchor);anchor.click();setTimeout(()=>{anchor.remove();URL.revokeObjectURL(url);},60000);
+    }catch(error){
+      if(error&&error.name==='AbortError')return;
+      alert('저장 창을 열지 못했습니다. Safari에서 다시 시도해주세요.');
+    }
+  };
+  motionExportStatus.append(saveButton);
+};
+</script>
 </body></html>
