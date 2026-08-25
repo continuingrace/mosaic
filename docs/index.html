@@ -206,4 +206,52 @@ const baseRenderText=renderText;renderText=renderTextWithRoll;
 textStartInput.oninput=()=>{textStart=+textStartInput.value;document.querySelector('#textStartValue').textContent=`${textStart.toFixed(1)}초`;scheduleTextWindow()};
 textDurationInput.oninput=()=>{textDuration=+textDurationInput.value;document.querySelector('#textDurationValue').textContent=`${textDuration.toFixed(1)}초`;scheduleTextWindow()};
 render();
+</script>
+<style>
+.film-overlay{position:absolute;inset:0;z-index:1.5;pointer-events:none;mix-blend-mode:multiply;background:#000;opacity:0;}
+.film-overlay::after{content:"";position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.9'/%3E%3C/svg%3E");background-size:180px 180px;mix-blend-mode:screen;opacity:var(--grain-opacity,0);}
+.look-controls{padding:15px 0 13px;border-bottom:1px solid var(--line);display:grid;gap:10px;font-size:11px;}
+.look-controls .row{min-height:34px;gap:12px;}
+.look-controls input[type=range]{width:150px;accent-color:#8ea63e;}
+.look-controls input[type=color]{width:54px;height:34px;padding:3px;border:1px solid var(--line);border-radius:8px;background:#fff;}
+.look-value{color:#8ea63e;font-variant-numeric:tabular-nums;}
+.tile-text-grid{position:absolute;inset:0;z-index:4;display:grid;grid-template-columns:repeat(var(--cols),1fr);grid-template-rows:repeat(var(--rows),1fr);pointer-events:none;}
+.tile-text-cell{position:relative;overflow:hidden;}
+.tile-text-inner{position:absolute;left:calc(var(--tx) * -100%);top:calc(var(--ty) * -100%);width:calc(var(--cols) * 100%);height:calc(var(--rows) * 100%);display:flex;align-items:center;justify-content:center;padding:24px;color:var(--text-color);font-family:var(--text-font);font-size:var(--text-size);font-weight:800;line-height:1.2;letter-spacing:-.025em;text-align:center;white-space:pre-wrap;text-shadow:0 2px 16px #0009;}
+.tile-text-cell{animation:flipSafe .94s cubic-bezier(.22,.72,.25,1) both;animation-delay:var(--safe-delay);}
+@media(max-width:720px){.look-controls input[type=range]{width:135px;}.tile-text-inner{padding:24px;line-height:1.24;letter-spacing:-.02em;}}
+</style>
+<script>
+const LOOK_VERSION='v2026.08.25.07';
+const latestBadge=document.querySelector('.build-version');if(latestBadge)latestBadge.textContent=`BUILD ${LOOK_VERSION}`;
+let filmColor='#263b34',filmOpacity=0,grainOpacity=0;
+const filmLayer=document.createElement('div');filmLayer.className='film-overlay';stage.append(filmLayer);
+const lookControls=document.createElement('div');lookControls.className='look-controls';lookControls.innerHTML=`<div class="row"><span>필름지 색상</span><input id="filmColor" type="color" value="#263b34"></div><div class="row"><span>필름지 투명도</span><span><input id="filmOpacity" type="range" min="0" max=".7" step=".01" value="0"><span class="look-value" id="filmOpacityValue">0%</span></span></div><div class="row"><span>그레인</span><span><input id="grainOpacity" type="range" min="0" max=".45" step=".01" value="0"><span class="look-value" id="grainOpacityValue">0%</span></span></div>`;document.querySelector('.settings').after(lookControls);
+const filmColorInput=document.querySelector('#filmColor'),filmOpacityInput=document.querySelector('#filmOpacity'),grainOpacityInput=document.querySelector('#grainOpacity');
+function syncLook(){filmLayer.style.backgroundColor=filmColor;filmLayer.style.opacity=filmOpacity;filmLayer.style.setProperty('--grain-opacity',grainOpacity);document.querySelector('#filmOpacityValue').textContent=`${Math.round(filmOpacity*100)}%`;document.querySelector('#grainOpacityValue').textContent=`${Math.round(grainOpacity/.45*100)}%`;}
+filmColorInput.oninput=()=>{filmColor=filmColorInput.value;syncLook()};filmOpacityInput.oninput=()=>{filmOpacity=+filmOpacityInput.value;syncLook()};grainOpacityInput.oninput=()=>{grainOpacity=+grainOpacityInput.value;syncLook()};syncLook();
+
+function addRollLine(parent,lineText,lineIndex){const line=document.createElement('div');line.className='roll-line';[...lineText].forEach((ch,i)=>{const holder=document.createElement('span');holder.className='roll-char';holder.style.setProperty('--i',i+lineIndex*20);const current=document.createElement('span'),next=document.createElement('span');current.className='roll-current';next.className='roll-next';current.textContent=ch===' '?'\u00a0':ch;next.textContent=ch===' '?'\u00a0':ch;holder.append(current,next);line.append(holder)});parent.append(line);}
+const textRenderBeforeGrid=renderText;
+renderText=function(){
+  textOverlay.style.setProperty('--text-size',`${textSize}vw`);textOverlay.style.setProperty('--text-color',textColor);textOverlay.style.setProperty('--text-font',textFont);
+  if(!textValue.trim()){textRenderBeforeGrid();return;}
+  if(textStyle==='roll'&&mode==='flip'){
+    textOverlay.innerHTML='';textOverlay.className='text-overlay tile-text';const grid=document.createElement('div');grid.className='tile-text-grid';
+    for(let i=0;i<cols*rows;i++){const x=i%cols,y=Math.floor(i/cols),cell=document.createElement('div'),inner=document.createElement('div');cell.className='tile-text-cell';cell.style.setProperty('--safe-delay',`${delayFor(i,x,y)}s`);inner.className='tile-text-inner';inner.style.setProperty('--tx',x);inner.style.setProperty('--ty',y);inner.textContent=textValue;cell.append(inner);grid.append(cell);}textOverlay.append(grid);scheduleTextWindow();return;
+  }
+  if(textStyle==='roll'){
+    textOverlay.innerHTML='';textOverlay.className='text-overlay roll';const lines=textValue.split('\n');const wrap=document.createElement('div');lines.forEach((line,i)=>addRollLine(wrap,line,i));textOverlay.append(wrap);scheduleTextWindow();return;
+  }
+  textRenderBeforeGrid();const overlayText=textOverlay.querySelector('.overlay-text');if(overlayText)overlayText.style.whiteSpace='pre-line';scheduleTextWindow();
+};
+
+const renderBeforeCleanup=render;
+render=function(){
+  renderBeforeCleanup();
+  // Remove the obsolete hidden front/back cards so only the active grid remains.
+  stage.querySelectorAll('.flip-tile').forEach(tile=>tile.remove());
+  syncLook();
+};
+render();
 </script></body></html>
