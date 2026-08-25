@@ -357,4 +357,40 @@ if(captionField&&captionField.tagName==='INPUT'){
 captionField.removeAttribute('maxlength');captionField.oninput=()=>{textValue=captionField.value;renderText();queueProjectSave();};
 captionField.addEventListener('keydown',event=>{if(event.key==='Enter'){event.stopPropagation();setTimeout(()=>{textValue=captionField.value;renderText();queueProjectSave()},0);}});
 render();
+</script>
+<style>
+.film-overlay{z-index:2!important;background:transparent!important;opacity:1!important;}
+.film-overlay::before{content:"";position:absolute;inset:0;background:var(--film-color,#263b34);opacity:var(--film-opacity,0);mix-blend-mode:multiply;}
+.film-overlay::after{opacity:var(--grain-opacity,0)!important;}
+.meta{z-index:3;}
+.text-overlay{z-index:4;}
+</style>
+<script>
+const STABLE_TEXT_VERSION='v2026.08.25.13';const stableTextBadge=document.querySelector('.build-version');if(stableTextBadge)stableTextBadge.textContent=`BUILD ${STABLE_TEXT_VERSION}`;
+function syncLookStable(){filmLayer.style.setProperty('--film-color',filmColor);filmLayer.style.setProperty('--film-opacity',filmOpacity);filmLayer.style.setProperty('--grain-opacity',grainOpacity);filmLayer.style.backgroundColor='transparent';filmLayer.style.opacity='1';document.querySelector('#filmOpacityValue').textContent=`${Math.round(filmOpacity*100)}%`;document.querySelector('#grainOpacityValue').textContent=`${Math.round(grainOpacity/.45*100)}%`;}
+syncLook=syncLookStable;syncLookStable();
+let lastTextKey='',lastTextWindowState='';
+function scheduleGlobalTextStable(){
+  globalTextTimers.forEach(clearTimeout);globalTextTimers=[];
+  if(!textValue.trim()){textOverlay.style.opacity='';lastTextWindowState='';return;}
+  const elapsed=(performance.now()-sequenceStartedAt)/1000,start=textStart,end=textStart+textDuration;
+  const state=elapsed<start?'before':elapsed<end?'visible':'after';
+  if(state===lastTextWindowState&&state==='visible')return;
+  lastTextWindowState=state;
+  const reveal=()=>{textOverlay.style.opacity='1';textOverlay.classList.remove('text-enter');void textOverlay.offsetWidth;textOverlay.classList.add('text-enter');};
+  const hide=()=>{textOverlay.style.opacity='0';};
+  if(state==='before'){hide();globalTextTimers.push(setTimeout(reveal,(start-elapsed)*1000));globalTextTimers.push(setTimeout(hide,(end-elapsed)*1000));}
+  else if(state==='visible'){reveal();globalTextTimers.push(setTimeout(hide,(end-elapsed)*1000));}
+  else hide();
+}
+scheduleTextWindow=scheduleGlobalTextStable;
+function retimeLongRoll(){let n=0;textOverlay.querySelectorAll('.roll-char .roll-current,.roll-char .roll-next').forEach(el=>{el.style.animationDelay=`${Math.min(n++*.018,.55)}s`;});}
+const renderTextStableBefore=renderText;
+renderText=function(){
+  const key=[textValue,textStyle,mode==='flip'?'flip':'plain',textFont,textSize,textColor,textLineHeight].join('|');
+  const shouldKeep=key===lastTextKey&&mode!=='flip'&&textOverlay.children.length;
+  if(shouldKeep){syncTextLeading();retimeLongRoll();scheduleGlobalTextStable();return;}
+  lastTextKey=key;lastTextWindowState='';renderTextStableBefore();syncTextLeading();retimeLongRoll();scheduleGlobalTextStable();
+};
+render();
 </script></body></html>
