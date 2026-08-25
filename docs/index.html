@@ -163,4 +163,47 @@ render=function(){
   },2150));
 };
 render();
+</script>
+<style>
+.text-overlay .roll-line{line-height:1.2;}
+.text-overlay .roll-char{height:1.2em;min-width:.28em;position:relative;overflow:hidden;vertical-align:top;}
+.text-overlay .roll-char .roll-current,.text-overlay .roll-char .roll-next{position:absolute;left:0;top:0;width:100%;display:block;min-width:100%;}
+.text-overlay .roll-char .roll-current{transform:translateY(0);}
+.text-overlay .roll-char .roll-next{transform:translateY(105%);}
+.text-overlay.text-enter .roll-char .roll-current{animation:rollOut .62s cubic-bezier(.16,.8,.35,1) both;animation-delay:calc(var(--i)*.035s);}
+.text-overlay.text-enter .roll-char .roll-next{animation:rollIn .62s cubic-bezier(.16,.8,.35,1) both;animation-delay:calc(var(--i)*.035s);}
+@keyframes rollOut{from{transform:translateY(0);opacity:1}to{transform:translateY(-105%);opacity:0}}
+@keyframes rollIn{from{transform:translateY(105%);opacity:0}to{transform:translateY(0);opacity:1}}
+.timing-controls{display:grid;gap:8px;padding-top:4px;}
+.timing-controls .timing-value{color:#8ea63e;font-variant-numeric:tabular-nums;}
+.timing-controls input[type=range]{width:150px;accent-color:#8ea63e;}
+@media(max-width:720px){.timing-controls input[type=range]{width:135px;}}
+</style>
+<script>
+const TEXT_VERSION='v2026.08.25.06';
+const badge=document.querySelector('.build-version');if(badge){badge.textContent=`BUILD ${TEXT_VERSION}`;}
+let textStart=0.6,textDuration=3.2,textTimingTimers=[];
+const timingBox=document.createElement('div');timingBox.className='timing-controls';timingBox.innerHTML=`<div class="row"><span>표시 시작</span><span><input id="textStart" type="range" min="0" max="4.8" step=".1" value=".6"><span class="timing-value" id="textStartValue">0.6초</span></span></div><div class="row"><span>표시 시간</span><span><input id="textDuration" type="range" min=".4" max="5.2" step=".1" value="3.2"><span class="timing-value" id="textDurationValue">3.2초</span></span></div>`;
+document.querySelector('.text-controls').append(timingBox);
+const textStartInput=document.querySelector('#textStart'),textDurationInput=document.querySelector('#textDuration');
+function scheduleTextWindow(){
+  textTimingTimers.forEach(clearTimeout);textTimingTimers=[];
+  if(!textValue.trim()){textOverlay.style.opacity='';return;}
+  const cycle=Math.max(1.2,5200/speed/1000),start=Math.min(textStart,cycle-.2),duration=Math.min(textDuration,cycle-start);
+  textOverlay.style.opacity='0';
+  textTimingTimers.push(setTimeout(()=>{textOverlay.style.opacity='1';textOverlay.classList.remove('text-enter');void textOverlay.offsetWidth;textOverlay.classList.add('text-enter');},start*1000));
+  textTimingTimers.push(setTimeout(()=>{textOverlay.style.opacity='0';},(start+duration)*1000));
+}
+function renderTextWithRoll(){
+  textOverlay.style.setProperty('--text-size',`${textSize}vw`);textOverlay.style.setProperty('--text-color',textColor);textOverlay.style.setProperty('--text-font',textFont);
+  if(textStyle!=='roll'){baseRenderText();scheduleTextWindow();return;}
+  textOverlay.innerHTML='';textOverlay.className='text-overlay roll';
+  const line=document.createElement('div');line.className='roll-line';
+  [...textValue].forEach((ch,i)=>{const holder=document.createElement('span');holder.className='roll-char';holder.style.setProperty('--i',i);const current=document.createElement('span'),next=document.createElement('span');current.className='roll-current';next.className='roll-next';current.textContent=ch===' '?'\u00a0':ch;next.textContent=ch===' '?'\u00a0':ch;holder.append(current,next);line.append(holder)});
+  textOverlay.append(line);scheduleTextWindow();
+}
+const baseRenderText=renderText;renderText=renderTextWithRoll;
+textStartInput.oninput=()=>{textStart=+textStartInput.value;document.querySelector('#textStartValue').textContent=`${textStart.toFixed(1)}초`;scheduleTextWindow()};
+textDurationInput.oninput=()=>{textDuration=+textDurationInput.value;document.querySelector('#textDurationValue').textContent=`${textDuration.toFixed(1)}초`;scheduleTextWindow()};
+render();
 </script></body></html>
