@@ -344,4 +344,17 @@ document.querySelector('#files').onchange=async e=>{const fs=[...e.target.files]
 thumbs.addEventListener('click',()=>queueProjectSave());
 window.addEventListener('pagehide',()=>{clearTimeout(saveTimer);writeProject()});
 restoreProject();
+</script>
+<style>
+.text-controls textarea#caption{width:100%;min-height:72px;resize:vertical;border:1px solid var(--line);background:#fff8;padding:10px;color:var(--ink);font:16px/1.5 Arial,Helvetica,sans-serif;white-space:pre-wrap;}
+</style>
+<script>
+const MULTILINE_VERSION='v2026.08.25.12';const multilineBadge=document.querySelector('.build-version');if(multilineBadge)multilineBadge.textContent=`BUILD ${MULTILINE_VERSION}`;
+let captionField=document.querySelector('#caption');
+if(captionField&&captionField.tagName==='INPUT'){
+  const area=document.createElement('textarea');area.id='caption';area.name=captionField.name||'caption';area.placeholder=captionField.placeholder;area.value=captionField.value;area.setAttribute('aria-label','전환 텍스트');area.rows=2;captionField.replaceWith(area);captionField=area;
+}
+captionField.removeAttribute('maxlength');captionField.oninput=()=>{textValue=captionField.value;renderText();queueProjectSave();};
+captionField.addEventListener('keydown',event=>{if(event.key==='Enter'){event.stopPropagation();setTimeout(()=>{textValue=captionField.value;renderText();queueProjectSave()},0);}});
+render();
 </script></body></html>
