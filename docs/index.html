@@ -1034,4 +1034,153 @@ saveMotionBlob=function(blob,type){
   motionExportStatus.append(saveButton);
 };
 </script>
+
+<style id="mosaic-motion-text-export-v30">
+/* v30: one text timeline for preview and export. Existing legacy roll rules are explicitly superseded here. */
+.text-overlay.v30-roll{display:flex!important;align-items:center!important;justify-content:center!important;overflow:hidden!important;}
+.text-overlay.v30-roll .v30-roll-wrap{width:calc(100% - 40px);max-width:calc(100% - 40px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;white-space:normal;line-height:var(--text-leading,1.2);letter-spacing:var(--text-tracking,-.02em);}
+.text-overlay.v30-roll .motion-roll-line{width:100%;display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-start;min-height:calc(var(--text-leading,1.2) * 1em);line-height:inherit;letter-spacing:inherit;}
+.text-overlay.v30-roll .motion-roll-char{display:inline-block!important;position:relative;overflow:hidden;min-width:.22em;height:calc(var(--text-leading,1.2) * 1em);line-height:inherit;letter-spacing:inherit;}
+.text-overlay.v30-roll .motion-roll-char>span{display:block;opacity:1;transform:translateY(0);animation:none!important;}
+.text-overlay.v30-roll.v30-roll-active .motion-roll-char>span{animation:v30TextRollIn .66s cubic-bezier(.16,.8,.35,1) var(--v30-roll-delay,0s) both!important;}
+@keyframes v30TextRollIn{0%{transform:translateY(112%);opacity:0}100%{transform:translateY(0);opacity:1}}
+.motion-export-status{font:11px/1.55 Arial,Helvetica,sans-serif;color:#69736f;margin-top:9px;}
+.motion-export-status .motion-save-file,.motion-export-status .motion-download-file{margin:7px 6px 0 0;border:1px solid #8ea63e;background:#17211e;color:#d8ef79;padding:8px 10px;font:700 11px Arial,Helvetica,sans-serif;border-radius:2px;text-decoration:none;display:inline-block;}
+.motion-export-status .motion-download-file{background:#fff;color:#17211e;border-color:#c8d0cb;}
+</style>
+<script>
+const MOTION_TEXT_EXPORT_V30='v2026.08.25.30';
+const motionV30Badge=document.querySelector('.build-version');
+if(motionV30Badge)motionV30Badge.textContent='BUILD '+MOTION_TEXT_EXPORT_V30;
+
+/* Preview text: DOM is built once, then a single global time window controls it. */
+let v30TextKey='',v30TextWindow='',v30TextTimers=[],v30ExportText=null;
+function v30ClearTextTimers(){v30TextTimers.forEach(clearTimeout);v30TextTimers=[];}
+function v30BuildRoll(parent,text,lineIndex){
+  const line=document.createElement('div');line.className='motion-roll-line';
+  Array.from(text||' ').forEach((character,index)=>{
+    const holder=document.createElement('span'),glyph=document.createElement('span');
+    holder.className='motion-roll-char';
+    glyph.textContent=character===' '?'\u00a0':character;
+    glyph.style.setProperty('--v30-roll-delay',Math.min((lineIndex*24+index)*.018,.46)+'s');
+    holder.append(glyph);line.append(holder);
+  });
+  parent.append(line);
+}
+function v30TriggerRoll(){
+  if(textStyle!=='roll')return;
+  textOverlay.classList.remove('v30-roll-active');
+  textOverlay.querySelectorAll('.motion-roll-char>span').forEach(glyph=>{glyph.style.animation='none';glyph.style.transform='translateY(112%)';glyph.style.opacity='0';});
+  void textOverlay.offsetWidth;
+  textOverlay.classList.add('v30-roll-active');
+}
+function v30ScheduleText(){
+  v30ClearTextTimers();
+  if(!textValue.trim()){textOverlay.style.opacity='0';v30TextWindow='hidden';return;}
+  const elapsed=performance.now()-sequenceStartedAt;
+  const start=Math.max(0,Number(textStart)||0)*1000;
+  const end=start+Math.max(.1,Number(textDuration)||0)*1000;
+  const show=animate=>{textOverlay.style.opacity='1';if(animate)v30TriggerRoll();else textOverlay.querySelectorAll('.motion-roll-char>span').forEach(glyph=>{glyph.style.transform='translateY(0)';glyph.style.opacity='1';});};
+  if(elapsed<start){
+    textOverlay.style.opacity='0';v30TextWindow='before';
+    v30TextTimers.push(setTimeout(()=>{v30TextWindow='visible';show(true);},start-elapsed));
+    v30TextTimers.push(setTimeout(()=>{v30TextWindow='after';textOverlay.style.opacity='0';},end-elapsed));
+  }else if(elapsed<end){
+    const animate=v30TextWindow!=='visible';v30TextWindow='visible';show(animate);
+    v30TextTimers.push(setTimeout(()=>{v30TextWindow='after';textOverlay.style.opacity='0';},end-elapsed));
+  }else{textOverlay.style.opacity='0';v30TextWindow='after';}
+}
+function renderV30Text(){
+  const key=[textValue,textStyle,textFont,textSize,textColor,textLineHeight,textLetterSpacing,textX,textY,textOpacity].join('|');
+  if(!textValue.trim()){v30TextKey='';textOverlay.innerHTML='';textOverlay.className='text-overlay';textOverlay.style.opacity='0';return;}
+  if(key!==v30TextKey||!textOverlay.children.length){
+    v30TextKey=key;textOverlay.innerHTML='';
+    textOverlay.style.setProperty('--text-size',String(textSize)+'vw');
+    textOverlay.style.setProperty('--text-color',textColor);
+    textOverlay.style.setProperty('--text-font',textFont);
+    if(textStyle==='roll'){
+      textOverlay.className='text-overlay roll v30-roll';
+      const wrap=document.createElement('div');wrap.className='v30-roll-wrap';
+      String(textValue).split('\n').forEach((line,index)=>v30BuildRoll(wrap,line,index));
+      textOverlay.append(wrap);
+    }else{
+      textOverlay.className='text-overlay puzzle';
+      const line=document.createElement('div');line.className='overlay-text';line.textContent=String(textValue);textOverlay.append(line);
+    }
+  }
+  applyTextSize();applyTextLayout();syncTextLeading();v30ScheduleText();
+}
+renderText=renderV30Text;
+function v30RestartText(){
+  sequenceStartedAt=performance.now();v30TextKey='';v30TextWindow='';v30ClearTextTimers();renderText();queueProjectSave();
+}
+captionField.oninput=()=>{textValue=captionField.value;v30RestartText();};
+document.querySelector('#textMode').onchange=event=>{textStyle=event.target.value;v30RestartText();};
+document.querySelector('#font').onchange=event=>{textFont=event.target.value;v30RestartText();};
+document.querySelector('#textColor').oninput=event=>{textColor=event.target.value;v30RestartText();};
+['#textStart','#textDuration'].forEach(selector=>{const input=document.querySelector(selector);if(input)input.addEventListener('input',()=>{v30TextWindow='';v30ScheduleText();});});
+
+/* Canvas text: the exporter snapshots the exact active settings and uses the same global timing rules. */
+function v30SnapshotText(){
+  return {value:String(textValue||''),style:textStyle,font:textFont,size:Number(textSize)||5,color:textColor,start:Number(textStart)||0,duration:Math.max(.1,Number(textDuration)||0),lineHeight:Number(textLineHeight)||1.2,tracking:Number(textLetterSpacing)||0,x:Number(textX)||50,y:Number(textY)||50,opacity:Math.max(0,Math.min(1,Number(textOpacity)))};
+}
+function v30TrackedWidth(ctx,line,tracking){return Array.from(line).reduce((sum,char,index)=>sum+ctx.measureText(char).width+(index?tracking:0),0);}
+function v30WrapCanvasLine(ctx,line,maxWidth,tracking){
+  if(!line)return [''];
+  const lines=[],chars=Array.from(line);let current='';
+  chars.forEach(character=>{const candidate=current+character;if(current&&v30TrackedWidth(ctx,candidate,tracking)>maxWidth){lines.push(current);current=character;}else current=candidate;});
+  if(current||!lines.length)lines.push(current);return lines;
+}
+function v30DrawCanvasLine(ctx,line,cx,y,tracking,rollMs,fontSize,indexOffset,alpha){
+  const chars=Array.from(line||' '),total=v30TrackedWidth(ctx,line||' ',tracking);let x=cx-total/2;
+  chars.forEach((character,index)=>{
+    const delay=Math.min((indexOffset+index)*18,460),progress=rollMs===null?1:motionEase((rollMs-delay)/660);
+    if(progress>0){ctx.save();ctx.globalAlpha=alpha*progress;ctx.fillText(character===' '?' ':character,x,y+(1-progress)*fontSize*.92);ctx.restore();}
+    x+=ctx.measureText(character).width+tracking;
+  });
+  return indexOffset+chars.length;
+}
+drawMotionText=function(ctx,elapsedMs,width,height){
+  const t=v30ExportText||v30SnapshotText();
+  if(!t.value.trim())return;
+  const start=t.start*1000,end=start+t.duration*1000;
+  if(elapsedMs<start||elapsedMs>=end)return;
+  const fontSize=Math.max(24,Math.round(width*t.size/100)),tracking=fontSize*t.tracking,lineHeight=Math.max(fontSize*.86,fontSize*t.lineHeight),rollMs=t.style==='roll'?elapsedMs-start:null;
+  ctx.save();ctx.font='800 '+fontSize+'px '+t.font;ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillStyle=t.color;ctx.shadowColor='#0009';ctx.shadowBlur=Math.max(3,fontSize*.15);
+  const lines=String(t.value).split('\n').flatMap(line=>v30WrapCanvasLine(ctx,line,width*.88,tracking));
+  const baseY=height*t.y/100-(lines.length-1)*lineHeight/2;let offset=0;
+  lines.forEach((line,index)=>{offset=v30DrawCanvasLine(ctx,line,width*t.x/100,baseY+index*lineHeight,tracking,rollMs,fontSize,offset,t.opacity);});
+  ctx.restore();
+};
+
+/* Capture fonts/settings before the asynchronous export, so the saved MP4 cannot lose its text layer. */
+const v30ExportAllPhotosMotion=exportAllPhotosMotion;
+exportAllPhotosMotion=async function(){
+  if(motionExportRunning)return;
+  v30ExportText=v30SnapshotText();
+  try{
+    if(document.fonts&&document.fonts.ready)await Promise.race([document.fonts.ready,new Promise(resolve=>setTimeout(resolve,1200))]);
+    return await v30ExportAllPhotosMotion();
+  }finally{v30ExportText=null;}
+};
+document.querySelector('#export').onclick=exportAllPhotosMotion;
+
+/* iPhone: a download is not a Photos save. Keep a direct user-gesture share/save control instead of a fragile automatic download. */
+saveMotionBlob=function(blob,type){
+  const ext=type.indexOf('mp4')>-1?'mp4':'webm',name='mosaic-motion-'+Date.now()+'.'+ext,file=new File([blob],name,{type});
+  latestMotionExportFile=file;
+  motionExportStatus.replaceChildren(document.createTextNode(ext==='mp4'?'영상이 준비되었습니다. 아래 버튼을 누른 뒤 iPhone 공유창에서 “비디오 저장”을 선택하세요. ':'WebM 영상이 준비되었습니다. 브라우저가 MP4 녹화를 지원하지 않아 WebM으로 만들었습니다. '));
+  const share=document.createElement('button');share.type='button';share.className='motion-save-file';share.textContent='영상 저장 / 공유';
+  const download=document.createElement('a');download.className='motion-download-file';download.textContent='파일 다운로드';download.href=URL.createObjectURL(file);download.download=name;
+  share.onclick=async()=>{
+    try{
+      if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:'Mosaic Motion'});return;}
+      download.click();
+    }catch(error){if(!error||error.name!=='AbortError')download.click();}
+  };
+  motionExportStatus.append(share,download);
+};
+render();autoplay();
+</script>
+
 </body></html>
