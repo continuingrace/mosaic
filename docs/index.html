@@ -126,4 +126,41 @@ render=function(){
   }
 };
 render();
+</script>
+<style>
+/* Stable flip-puzzle implementation: the image swaps at the fold midpoint,
+   so the next photo is never mirrored or spatially remapped. */
+.stage.flip .flip-tile{display:none!important;}
+.stage.flip .flip-safe{position:relative;z-index:1;perspective:900px;transform-style:preserve-3d;opacity:0;background-repeat:no-repeat;background-size:calc(var(--cols)*100%) calc(var(--rows)*100%);border-right:1px solid #0005;border-bottom:1px solid #0005;animation:flipSafe .94s cubic-bezier(.22,.72,.25,1) both;animation-delay:var(--safe-delay);}
+@keyframes flipSafe{0%{opacity:0;transform:rotateY(0deg) scale(.98)}18%{opacity:1}48%{transform:rotateY(88deg) scale(.985);filter:brightness(1.55)}52%{transform:rotateY(92deg) scale(.985);filter:brightness(1.55)}100%{opacity:1;transform:rotateY(0deg) scale(1);filter:none}}
+.build-version{margin-left:auto;margin-right:12px;color:#8ea63e;font-size:9px;letter-spacing:.1em;white-space:nowrap;}
+@media(max-width:720px){.build-version{font-size:8px;margin-right:0;}.privacy{display:none!important;}}
+</style>
+<script>
+const BUILD_VERSION='v2026.08.25.05';
+const versionBadge=document.createElement('span');versionBadge.className='build-version';versionBadge.textContent=`BUILD ${BUILD_VERSION}`;document.querySelector('.top').append(versionBadge);
+
+let safeFlipTimers=[];
+const previousRender=render;
+render=function(){
+  safeFlipTimers.forEach(clearTimeout);safeFlipTimers=[];
+  clearTimeout(flipSettleTimer);
+  stage.querySelectorAll('.flip-safe,.flip-final').forEach(layer=>layer.remove());
+  previousRender();
+  if(mode!=='flip'||photos.length<2)return;
+  const current=photos[active],next=photos[(active+1)%photos.length];
+  const currentUrl=current.displayUrl||current.url,nextUrl=next.displayUrl||next.url;
+  for(let i=0;i<cols*rows;i++){
+    const x=i%cols,y=Math.floor(i/cols),tile=document.createElement('div');
+    const delay=delayFor(i,x,y);tile.className='flip-safe';tile.style.setProperty('--safe-delay',`${delay}s`);
+    tile.style.backgroundImage=`url("${currentUrl}")`;tile.style.backgroundPosition=`${cols===1?0:x/(cols-1)*100}% ${rows===1?0:y/(rows-1)*100}%`;
+    stage.append(tile);
+    safeFlipTimers.push(setTimeout(()=>{tile.style.backgroundImage=`url("${nextUrl}")`},(delay+.46)*1000));
+  }
+  safeFlipTimers.push(setTimeout(()=>{
+    const finalLayer=document.createElement('div');finalLayer.className='flip-final';finalLayer.style.backgroundImage=`url("${nextUrl}")`;stage.append(finalLayer);
+    stage.querySelectorAll('.flip-safe,.flip-tile').forEach(tile=>tile.remove());
+  },2150));
+};
+render();
 </script></body></html>
