@@ -393,4 +393,15 @@ renderText=function(){
   lastTextKey=key;lastTextWindowState='';renderTextStableBefore();syncTextLeading();retimeLongRoll();scheduleGlobalTextStable();
 };
 render();
+</script>
+<style>
+.text-overlay .roll-line,.text-overlay .overlay-text,.tile-text-inner{font-size:var(--text-size,5vw)!important;}
+.size-value{color:#8ea63e;font-variant-numeric:tabular-nums;}
+</style>
+<script>
+const SIZE_VERSION='v2026.08.25.14';const sizeBadge=document.querySelector('.build-version');if(sizeBadge)sizeBadge.textContent=`BUILD ${SIZE_VERSION}`;
+const sizeInput=document.querySelector('#textSize');const sizeRow=sizeInput?.closest('.row');if(sizeRow&&!sizeRow.querySelector('.size-value')){const value=document.createElement('span');value.className='size-value';value.id='textSizeValue';value.textContent=`${textSize.toFixed(1)}vw`;sizeRow.append(value);}
+function applyTextSize(){const value=`${textSize}vw`;stage.style.setProperty('--text-size',value);textOverlay.style.setProperty('--text-size',value);textOverlay.querySelectorAll('.roll-line,.overlay-text,.tile-text-inner').forEach(el=>{el.style.fontSize=value;});const output=document.querySelector('#textSizeValue');if(output)output.textContent=value;}
+sizeInput.oninput=()=>{textSize=+sizeInput.value;applyTextSize();renderText();queueProjectSave();};
+applyTextSize();
 </script></body></html>
