@@ -1,499 +1,73 @@
 <!doctype html>
-<html lang="ko"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#17211e"><link rel="manifest" href="../public/manifest.webmanifest"><title>Photo Mosaic Motion</title>
-<style>
-:root{--ink:#17211e;--line:#dfe5e1;--paper:#f5f7f4;--lime:#d8ef79}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:13px Arial,Helvetica,sans-serif}.app{min-height:100vh;padding:0 clamp(18px,5vw,74px);display:flex;flex-direction:column}.top{height:82px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:700;letter-spacing:.13em}.brand{display:flex;gap:11px;align-items:center}.mark{width:27px;height:27px;border-radius:50%;background:var(--ink);color:var(--lime);display:grid;place-items:center;font-size:16px}.privacy{color:#69736f;font-size:10px;letter-spacing:.04em}.privacy i{display:inline-block;width:6px;height:6px;border-radius:50%;background:#81b742;margin-right:6px}.hero{padding:clamp(35px,7vh,74px) 0 35px;display:flex;justify-content:space-between;align-items:end;gap:30px}.eyebrow{font-size:10px;letter-spacing:.2em;color:#8b9790;font-weight:700;margin:0 0 19px}.hero h1{font-size:clamp(36px,5vw,70px);line-height:.98;letter-spacing:-.07em;margin:0}.hero em{color:#9aaa39;font-style:normal}.intro{color:#75807a;font-size:13px;line-height:1.8;max-width:230px}.workspace{display:grid;grid-template-columns:minmax(0,1fr) 285px;gap:clamp(25px,5vw,72px)}.stagebox{position:relative}.stage{aspect-ratio:var(--ratio,1.7778);background:#1f302b;overflow:hidden;display:grid;grid-template-columns:repeat(var(--cols),1fr);grid-template-rows:repeat(var(--rows),1fr);position:relative;transition:aspect-ratio .3s}.backdrop{position:absolute;inset:-3%;background-size:cover;background-position:center;filter:saturate(.75) brightness(.65)}.tile{position:relative;z-index:1;opacity:0;background-size:calc(var(--cols)*100%) calc(var(--rows)*100%);border-right:1px solid #0004;border-bottom:1px solid #0004;animation:assemble 1.45s cubic-bezier(.16,.8,.35,1) forwards}@keyframes assemble{0%{opacity:0;transform:translate(var(--dx,0),var(--dy,18px)) scale(.94) rotate(var(--rot,0deg));filter:blur(7px)}60%{opacity:1}100%{opacity:1;transform:none;filter:none}}.stage.ripple .tile{animation-name:ripple}.stage.scatter .tile{animation-name:scatter}.stage.wave .tile{animation-name:wave}@keyframes ripple{0%{opacity:0;transform:scale(.55);filter:blur(8px)}58%{opacity:1}100%{opacity:1;transform:scale(1);filter:none}}@keyframes scatter{0%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--rot)) scale(.65);filter:blur(7px)}55%{opacity:1}100%{opacity:1;transform:none;filter:none}}@keyframes wave{0%{opacity:0;transform:translateY(var(--dy));filter:blur(7px)}65%{opacity:1}100%{opacity:1;transform:none;filter:none}}.meta{position:absolute;inset:0;z-index:2;padding:18px 20px;display:flex;justify-content:flex-start;color:#fffC;font-size:10px;letter-spacing:.16em;pointer-events:none}.note{position:absolute;z-index:4;bottom:15px;left:18px;color:#fffB;font-size:10px}.play{position:absolute;right:18px;bottom:13px;z-index:5;width:37px;height:37px;border:1px solid #fff8;color:#fff;background:#0f1e1970;border-radius:50%}.panel{border-top:1px solid var(--ink);padding-top:13px}.heading,.row{display:flex;justify-content:space-between;align-items:center}.heading{font-size:10px;letter-spacing:.17em;font-weight:700;margin-bottom:18px}.count{color:#9ba59f;font-size:9px}.upload{height:86px;border:1px dashed #b9c4bd;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-weight:700;position:relative}.upload input{position:absolute;inset:0;opacity:0}.upload small{font-size:9px;color:#9aa59f;font-weight:400}.plus{font-size:21px;color:#8ea63e}.thumbs{display:flex;gap:7px;flex-wrap:wrap;padding:16px 0 18px;border-bottom:1px solid var(--line)}.thumb{width:52px;height:52px;padding:0;border:0;background:none;position:relative}.thumb img{width:100%;height:100%;object-fit:cover;filter:saturate(.72)}.thumb.active img{outline:2px solid var(--lime);outline-offset:2px;filter:none}.thumb span{position:absolute;left:5px;bottom:4px;color:#fff;font-size:8px;text-shadow:0 1px 4px #000}.settings{padding:17px 0 13px;border-bottom:1px solid var(--line);display:grid;gap:13px;font-size:11px}.speed button,select,.export{border:1px solid var(--line);background:none;color:#66736c;font-size:10px;padding:6px 8px}.speed button.active{background:var(--ink);color:var(--lime)}select{color:var(--ink);max-width:132px}.export{width:100%;margin-top:14px;background:var(--ink);border-color:var(--ink);color:var(--lime);font-weight:700;padding:10px}.export:disabled{opacity:.55}.tip{font-size:9px;color:#9aa59f;line-height:1.5}.progress{height:3px;background:#dfe5e1;margin-top:8px;display:none}.progress i{display:block;height:100%;width:0;background:var(--lime)}footer{margin-top:auto;padding:28px 0 24px;border-top:1px solid var(--line);display:flex;justify-content:space-between;color:#a0aaa4;font-size:9px;letter-spacing:.14em}@media(max-width:720px){.top{height:65px}.privacy{display:none}.hero{display:block;padding:38px 0 28px}.hero h1{font-size:clamp(35px,10vw,52px)}.intro{margin-top:22px}.workspace{display:block}.panel{margin-top:28px}.thumbs{flex-wrap:nowrap;overflow:auto}.thumb{flex:0 0 54px}footer{margin-top:42px}}
-</style><style>
-.text-overlay{--text-font:Arial,sans-serif;--text-size:clamp(22px,5vw,58px);--text-color:#fff;position:absolute;z-index:3;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;color:var(--text-color);font-family:var(--text-font);text-align:center;text-shadow:0 2px 16px #0009;padding:20px}.text-overlay .roll-line{display:inline-flex;overflow:hidden;font-size:var(--text-size);font-weight:800;letter-spacing:-.04em;line-height:.9}.text-overlay .roll-char{display:inline-block;position:relative;overflow:hidden;height:1em}.text-overlay .roll-char span{display:block;min-width:.25em;animation:textRollIn .7s cubic-bezier(.16,.8,.35,1) both;animation-delay:calc(var(--i)*.035s)}.text-overlay .roll-char span:last-child{position:absolute;top:100%;left:0}.text-overlay.puzzle{animation:textPuzzle 1.4s cubic-bezier(.16,.8,.35,1) both}.text-overlay.puzzle .overlay-text{animation:textPuzzleText 1.4s both}.text-controls{padding:16px 0 0;border-bottom:1px solid var(--line);display:grid;gap:9px}.text-controls input{width:100%;border:1px solid var(--line);background:#fff8;padding:9px 10px;color:var(--ink);font-size:11px}.text-controls label{font-size:10px;color:#7e8983}.text-controls .row{margin-bottom:2px}.text-controls small{font-size:9px;color:#9aa59f;line-height:1.4}@keyframes textRollIn{0%{transform:translateY(110%);opacity:0}100%{transform:translateY(0);opacity:1}}@keyframes textPuzzle{0%{opacity:.2;transform:scale(.92);filter:blur(5px)}45%{opacity:.55;transform:scale(1.04);filter:blur(1px)}100%{opacity:1;transform:scale(1);filter:none}}@keyframes textPuzzleText{0%{letter-spacing:.35em;opacity:0}100%{letter-spacing:-.04em;opacity:1}}
-.stage.flip{perspective:1100px}.stage.flip .flip-tile{position:relative;z-index:1;perspective:900px;transform-style:preserve-3d;animation:flipPuzzle 1.25s cubic-bezier(.2,.7,.25,1) both;animation-delay:var(--delay);border:0;background:transparent}.flip-inner{width:100%;height:100%;position:relative;transform-style:preserve-3d;animation:flipInner 1.25s cubic-bezier(.2,.7,.25,1) both;animation-delay:var(--delay)}.flip-face{position:absolute;inset:0;backface-visibility:hidden;background-size:calc(var(--cols)*100%) calc(var(--rows)*100%);border-right:1px solid #0005;border-bottom:1px solid #0005}.flip-front{background-color:#f8f8f8}.flip-back{transform:rotateY(180deg) scaleX(-1)}@keyframes flipPuzzle{0%{opacity:0;transform:scale(.98)}18%{opacity:1}100%{opacity:1;transform:scale(1)}}@keyframes flipInner{0%{transform:rotateY(0deg)}42%{transform:rotateY(90deg);filter:brightness(1.8)}100%{transform:rotateY(180deg);filter:none}}</style><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"></head>
-<body><main class="app"><header class="top"><div class="brand"><span class="mark">M</span><span>MOSAIC MOTION</span></div><span class="privacy"><i></i>기기에서만 처리</span></header><section class="hero"><div><p class="eyebrow">PHOTO SEQUENCE / 01</p><h1>사진이 조각나며<br><em>다음 장면으로</em> 넘어갑니다.</h1></div><p class="intro">사진의 비율과 전환 방식을 고르고, 원하는 장면을 MP4로 저장해보세요.</p></section><section class="workspace"><div class="stagebox"><div class="stage" id="stage"><div class="backdrop" id="backdrop"></div><div class="meta"><span id="counter"></span></div><div class="text-overlay" id="textOverlay"></div></div><button class="play" id="play">Ⅱ</button><div class="note" id="note">형상 우선 전환 중</div></div><aside class="panel"><div class="heading"><span>YOUR SEQUENCE</span><span class="count" id="count"></span></div><label class="upload"><input id="files" type="file" accept="image/*" multiple><span class="plus">＋</span><span>사진 추가하기</span><small>여러 장 선택 가능</small></label><div class="text-controls"><label for="caption">전환 텍스트</label><input id="caption" type="text" placeholder="예: 여름의 조각들" maxlength="36"><div class="row"><span>글꼴</span><select id="font"><option value="Noto Sans KR, sans-serif">Noto Sans KR</option><option value="IBM Plex Sans KR, sans-serif">IBM Plex Sans KR</option><option value="Space Grotesk, sans-serif">Space Grotesk</option><option value="DM Serif Display, serif">DM Serif Display</option><option value="Arial, sans-serif">Arial</option></select></div><div class="row"><span>글자 크기</span><input id="textSize" type="range" min="2" max="12" step=".5" value="5"></div><div class="row"><span>글자 색상</span><input id="textColor" type="color" value="#ffffff"></div><div class="row"><span>텍스트 모션</span><select id="textMode"><option value="roll">글자 롤 모션</option><option value="overlay">전체 오버레이</option></select></div><small>롤 모션은 글자 단위로 올라오고, 오버레이는 사진 조각 위에서 함께 퍼즐처럼 전환됩니다.</small></div><div class="thumbs" id="thumbs"></div><div class="settings"><div class="row"><span>화면 비율</span><select id="ratio"><option value="1.7778">16 : 9 가로</option><option value=".5625">9 : 16 세로</option><option value=".8">4 : 5 세로</option><option value="1">1 : 1 정사각</option></select></div><div class="row"><span>전환 방식</span><select id="mode"><option value="shape">형상 우선</option><option value="flip">3D 플립 퍼즐</option><option value="ripple">리플 확산</option><option value="scatter">불규칙 분해</option><option value="wave">파도 전환</option></select></div><div class="row"><span>전환 속도</span><span class="speed"><button data-speed=".6">.6×</button><button class="active" data-speed="1">기본</button><button data-speed="1.5">1.5×</button></span></div><div class="row"><span>격자 밀도</span><select id="density"><option value="6">6 × 6</option><option value="8" selected>8 × 6</option><option value="10">10 × 6</option><option value="square">정사각 조각</option></select></div></div><button class="export" id="export">MP4로 저장하기</button><div class="progress" id="progress"><i></i></div><p class="tip">✦ 형상 우선은 얼굴 감지 지원 브라우저에서 얼굴 위치를 우선점으로 사용합니다. 사진과 영상은 기기에서만 처리됩니다.</p></aside></section><footer><span>PHOTO MOSAIC MOTION</span><span>터치하여 사진을 바꿔보세요</span><span>2026</span></footer></main>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#17211e">
+  <title>Mosaic Motion</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;700;900&family=Playfair+Display:wght@500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--ink:#17211e;--muted:#77827c;--line:#dce3de;--paper:#f5f7f4;--lime:#d8ef79;--accent:#97ad3e}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:Arial,"Noto Sans KR",sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}.app{max-width:1440px;margin:0 auto;padding:0 clamp(18px,5vw,76px);min-height:100vh}.top{min-height:76px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px;font-weight:800;letter-spacing:.15em}.brand{display:flex;align-items:center;gap:10px}.mark{width:29px;height:29px;display:grid;place-items:center;border-radius:50%;background:var(--ink);color:var(--lime);font-size:17px}.version{font-size:10px;color:var(--accent);letter-spacing:.08em;white-space:nowrap}.hero{padding:clamp(32px,6vw,72px) 0 34px}.eyebrow{margin:0 0 16px;color:#8b9790;font-size:11px;font-weight:800;letter-spacing:.2em}.hero h1{margin:0;max-width:720px;font-size:clamp(34px,5.2vw,70px);line-height:1.07;letter-spacing:-.065em}.hero em{font-style:normal;color:#98aa38}.intro{margin:20px 0 0;max-width:450px;color:var(--muted);font-size:15px;line-height:1.8}.workspace{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:clamp(28px,5vw,76px);align-items:start}.preview-panel{min-width:0}.stage-frame{position:relative;background:#17211e;box-shadow:0 18px 42px #15221b18;overflow:hidden}.stage-frame canvas{display:block;width:100%;aspect-ratio:var(--aspect,4 / 5);background:#17211e}.frame-meta{position:absolute;top:18px;left:19px;color:#fff;font-size:11px;letter-spacing:.15em;text-shadow:0 1px 6px #0009}.frame-note{position:absolute;left:19px;bottom:18px;color:#fff;font-size:11px;text-shadow:0 1px 6px #0009}.play{position:absolute;right:20px;bottom:20px;width:44px;height:44px;border-radius:50%;border:1px solid #fff9;background:#10201999;color:#fff;font-size:17px}.preview-status{margin:11px 0 0;color:#89938d;font-size:11px;min-height:17px}.editor{border-top:1px solid var(--ink);padding-top:13px}.section-heading,.row{display:flex;align-items:center;justify-content:space-between;gap:12px}.section-heading{margin-bottom:16px;font-size:11px;font-weight:800;letter-spacing:.17em}.count{color:#94a09a;font-size:10px}.upload{height:94px;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:1px dashed #b9c4bd;font-size:13px;font-weight:700}.upload input{position:absolute;inset:0;opacity:0}.upload strong{font-size:25px;color:var(--accent);line-height:1}.upload small,.hint,.save-status{color:#99a39d;font-size:10px;line-height:1.6}.thumbs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:11px;padding:17px 0;border-bottom:1px solid var(--line)}.thumb{position:relative;aspect-ratio:1;padding:0;border:0;background:#dfe5e1;overflow:visible}.thumb img{width:100%;height:100%;object-fit:cover;display:block}.thumb.active img{outline:2px solid var(--lime);outline-offset:3px}.thumb .number{position:absolute;left:6px;bottom:5px;color:#fff;font-size:10px;text-shadow:0 1px 5px #000}.remove{position:absolute;top:-10px;right:-9px;width:23px;height:23px;border:1px solid #fff;background:var(--ink);border-radius:50%;color:var(--lime);font-size:17px;line-height:18px;z-index:2}.empty-thumbs{grid-column:1/-1;color:#98a29c;font-size:11px;padding:5px 0}.controls{display:grid;gap:13px;padding:17px 0;border-bottom:1px solid var(--line)}.text-controls{padding-top:17px}.text-controls label{font-size:11px;color:#738079}.text-controls textarea{width:100%;min-height:88px;resize:vertical;border:1px solid var(--line);background:#fff;padding:11px 12px;color:var(--ink);font-size:16px;line-height:1.5;letter-spacing:0}.row{font-size:13px}.row>span:first-child{white-space:nowrap}.control-value{color:var(--accent);font-size:11px;font-variant-numeric:tabular-nums;white-space:nowrap}.row select{max-width:180px}.row input[type=color]{width:54px;height:36px;padding:3px;border:1px solid var(--line);background:#fff}.row input[type=range]{width:155px;accent-color:var(--accent)}select{height:38px;max-width:100%;border:1px solid var(--line);border-radius:20px;background:#fff;color:var(--ink);padding:0 30px 0 12px;font-size:14px}select:focus,textarea:focus,input:focus{outline:2px solid #d7e9a399;outline-offset:1px}.speed{display:flex;border:1px solid var(--line)}.speed button{border:0;border-right:1px solid var(--line);background:#fff;color:#77827c;padding:8px 10px;font-size:12px}.speed button:last-child{border-right:0}.speed button.active{background:var(--ink);color:var(--lime)}.export{width:100%;margin-top:16px;padding:14px;border:1px solid var(--ink);background:var(--ink);color:var(--lime);font-size:14px;font-weight:800}.export:disabled{opacity:.5;cursor:wait}.progress{height:4px;margin-top:9px;background:#dfe5e1;overflow:hidden;display:none}.progress i{display:block;height:100%;width:0;background:var(--accent)}.download{display:none;width:100%;margin-top:9px;padding:12px;border:1px solid var(--accent);background:#fff;color:var(--ink);text-align:center;font-size:13px;font-weight:800;text-decoration:none}.backup{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.backup button{border:1px solid var(--line);background:#fff;color:var(--ink);padding:10px 7px;font-size:11px;font-weight:700}.backup input{display:none}.save-status{display:block;margin-top:10px;min-height:16px}.footer{display:flex;justify-content:space-between;gap:10px;margin-top:54px;padding:24px 0;border-top:1px solid var(--line);color:#a0aaa4;font-size:10px;letter-spacing:.12em}@media(max-width:760px){.app{padding:0 18px}.top{min-height:64px;font-size:11px}.hero{padding:35px 0 27px}.hero h1{font-size:clamp(35px,10.4vw,52px);line-height:1.1;letter-spacing:-.065em}.intro{font-size:14px;line-height:1.75}.workspace{display:grid;grid-template-columns:1fr;gap:26px}.preview-panel{position:sticky;top:0;z-index:10;background:var(--paper);padding-top:10px}.stage-frame{box-shadow:0 10px 24px #15221b15}.editor{margin-top:0}.frame-meta{top:14px;left:15px}.frame-note{left:15px;bottom:15px}.play{right:15px;bottom:15px}.row{font-size:14px}.row input[type=range]{width:min(43vw,170px)}select{font-size:16px}.footer{font-size:9px;margin-top:38px}.footer span:first-child{display:none}}
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="top"><div class="brand"><span class="mark">M</span><span>MOSAIC MOTION</span></div><span id="buildVersion" class="version"></span></header>
+    <section class="hero"><p class="eyebrow">PHOTO SEQUENCE</p><h1>사진의 조각이<br><em>다음 장면을 완성</em>합니다.</h1><p class="intro">사진 순서와 모션, 텍스트의 리듬을 한 화면에서 조정하고 그대로 영상으로 저장하세요.</p></section>
+    <section class="workspace">
+      <section class="preview-panel"><div id="stageFrame" class="stage-frame"><canvas id="preview" aria-label="모자이크 영상 미리보기"></canvas><span id="counter" class="frame-meta">00 / 00</span><span id="frameNote" class="frame-note">사진을 추가해보세요</span><button id="play" class="play" type="button" aria-label="재생 또는 일시정지">▶</button></div><p id="previewStatus" class="preview-status">미리보기 준비 중</p></section>
+      <aside class="editor">
+        <div class="section-heading"><span>YOUR SEQUENCE</span><span id="count" class="count">0 PHOTOS</span></div>
+        <label class="upload"><input id="files" type="file" accept="image/*" multiple><strong>＋</strong><span>사진 추가하기</span><small>여러 장을 한 번에 선택할 수 있어요</small></label>
+        <div id="thumbs" class="thumbs"></div>
+        <section class="controls text-controls">
+          <label for="caption">전환 텍스트</label><textarea id="caption" rows="3" placeholder="엔터로 줄을 바꿀 수 있어요"></textarea>
+          <div class="row"><span>글꼴</span><select id="font"><option value="Noto Sans KR">Noto Sans KR</option><option value="IBM Plex Sans KR">IBM Plex Sans KR</option><option value="Arial">Pretendard / 시스템 산세리프</option><option value="Manrope">Manrope</option><option value="Space Grotesk">Space Grotesk</option><option value="DM Serif Display">DM Serif Display</option><option value="Playfair Display">Playfair Display</option></select></div>
+          <div class="row"><span>글자 크기</span><span><input id="textSize" type="range" min="3" max="16" step=".25"><b id="textSizeValue" class="control-value"></b></span></div><div class="row"><span>글자 색상</span><input id="textColor" type="color"></div><div class="row"><span>텍스트 모션</span><select id="textMotion"><option value="roll">글자 롤 모션</option><option value="overlay">전체 오버레이</option></select></div>
+          <div class="row"><span>표시 시작</span><span><input id="textStart" type="range" min="0" max="12" step=".1"><b id="textStartValue" class="control-value"></b></span></div><div class="row"><span>표시 시간</span><span><input id="textDuration" type="range" min=".5" max="12" step=".1"><b id="textDurationValue" class="control-value"></b></span></div><div class="row"><span>행간</span><span><input id="lineHeight" type="range" min=".85" max="2" step=".05"><b id="lineHeightValue" class="control-value"></b></span></div><div class="row"><span>자간</span><span><input id="tracking" type="range" min="-.08" max=".2" step=".01"><b id="trackingValue" class="control-value"></b></span></div><div class="row"><span>가로 위치</span><span><input id="textX" type="range" min="0" max="100" step="1"><b id="textXValue" class="control-value"></b></span></div><div class="row"><span>세로 위치</span><span><input id="textY" type="range" min="0" max="100" step="1"><b id="textYValue" class="control-value"></b></span></div><div class="row"><span>글자 투명도</span><span><input id="textOpacity" type="range" min="0" max="1" step=".01"><b id="textOpacityValue" class="control-value"></b></span></div>
+          <p class="hint">텍스트는 영상 시작 기준으로 한 번만 나타납니다. 사진이 바뀔 때마다 다시 반복되지 않습니다.</p>
+        </section>
+        <section class="controls"><div class="row"><span>화면 비율</span><select id="ratio"><option value="16:9">16 : 9 가로</option><option value="9:16">9 : 16 세로</option><option value="4:5">4 : 5 세로</option><option value="1:1">1 : 1 정사각</option></select></div><div class="row"><span>전환 방식</span><select id="mode"><option value="shape">형상 우선</option><option value="flip">3D 플립 퍼즐</option><option value="ripple">리플 확산</option><option value="scatter">불규칙 분해</option><option value="wave">파도 전환</option></select></div><div class="row"><span>전환 속도</span><span class="speed"><button type="button" data-speed=".6">.6×</button><button type="button" data-speed="1">기본</button><button type="button" data-speed="1.5">1.5×</button></span></div><div class="row"><span>격자 밀도</span><select id="density"><option value="6x6">6 × 6</option><option value="8x6">8 × 6</option><option value="10x6">10 × 6</option><option value="square">정사각 조각</option></select></div><div class="row"><span>필름 색상</span><input id="filmColor" type="color"></div><div class="row"><span>필름 농도</span><span><input id="filmOpacity" type="range" min="0" max=".8" step=".01"><b id="filmOpacityValue" class="control-value"></b></span></div><div class="row"><span>그레인</span><span><input id="grain" type="range" min="0" max="1" step=".01"><b id="grainValue" class="control-value"></b></span></div></section>
+        <button id="export" class="export" type="button">MP4로 저장하기</button><div id="progress" class="progress"><i></i></div><a id="downloadLink" class="download" href="#">생성 완료 — 영상 저장하기</a><div class="backup"><button id="backupExport" type="button">작업 백업 저장</button><label><button id="backupImportButton" type="button">백업 복원</button><input id="backupImport" type="file" accept="application/json,.json"></label></div><span id="saveStatus" class="save-status">기기 자동 저장 준비 중</span><p class="hint">백업 파일에는 사진과 모든 편집값이 함께 저장됩니다. 업데이트 전에는 백업 저장을 한 번 눌러두세요.</p>
+      </aside>
+    </section>
+    <footer class="footer"><span>PHOTO MOSAIC MOTION</span><span>사진은 이 기기에서만 처리됩니다</span><span>2026</span></footer>
+  </main>
 <script>
-const demos=['https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=85','https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1200&q=85','https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1200&q=85'];let photos=demos.map((url,i)=>({url,name:'demo '+(i+1)})),active=0,playing=true,speed=1,cols=8,rows=6,squareGrid=false,mode='shape',ratio=1.7778,textValue='',textStyle='roll',textFont='Noto Sans KR, sans-serif',textSize=5,textColor='#ffffff',timer;const cropCache=new Map(),stage=document.querySelector('#stage'),backdrop=document.querySelector('#backdrop'),thumbs=document.querySelector('#thumbs'),counter=document.querySelector('#counter'),count=document.querySelector('#count'),note=document.querySelector('#note'),textOverlay=document.querySelector('#textOverlay');
-function seed(n){let x=Math.sin(n*999)*43758.5453;return x-Math.floor(x)}function delayFor(i,x,y){if(mode==='flip')return seed(i)*.55;if(mode==='ripple'){const d=Math.hypot(x-(cols-1)/2,y-(rows-1)/2);return d*.11+seed(i)*.08}if(mode==='wave')return (x*.075+y*.035)+seed(i)*.04;if(mode==='scatter')return seed(i)*1.15;return ((i*.035)+((i*7)%13)*.012)}
-function renderText(){textOverlay.innerHTML='';if(!textValue.trim()){textOverlay.className='text-overlay';return}if(textStyle==='roll'){textOverlay.className='text-overlay roll';const line=document.createElement('div');line.className='roll-line';[...textValue].forEach((ch,i)=>{const holder=document.createElement('span');holder.className='roll-char';holder.style.setProperty('--i',i);holder.innerHTML=`<span>${ch===' '?'\u00a0':ch}</span>`;line.append(holder)});textOverlay.append(line)}else{textOverlay.className='text-overlay puzzle';const line=document.createElement('div');line.className='overlay-text';line.textContent=textValue;textOverlay.append(line)}}
-function render(){rows=squareGrid?Math.max(1,Math.round(cols/ratio)):6;stage.style.setProperty('--cols',cols);stage.style.setProperty('--rows',rows);stage.style.setProperty('--ratio',ratio);stage.style.setProperty('--text-size',`${textSize}vw`);stage.style.setProperty('--text-color',textColor);stage.style.setProperty('--text-font',textFont);stage.className='stage '+(mode==='flip'?'flip':mode==='ripple'?'ripple':mode==='scatter'?'scatter':mode==='wave'?'wave':'');stage.querySelectorAll('.tile,.flip-tile').forEach(x=>x.remove());backdrop.style.backgroundImage=`url("${photos[active].displayUrl||photos[active].url}")`;counter.textContent=`${String(active+1).padStart(2,'0')} / ${String(photos.length).padStart(2,'0')}`;count.textContent=`${photos.length} PHOTOS`;note.textContent=mode==='shape'?'형상 우선 전환 중':mode==='flip'?'3D 플립 퍼즐 전환 중':mode==='ripple'?'리플 확산 전환 중':mode==='scatter'?'불규칙 분해 전환 중':'파도 전환 중';renderText();const next=photos[(active+1)%photos.length];for(let i=0;i<cols*rows;i++){const x=i%cols,y=Math.floor(i/cols),t=document.createElement('div');const d=delayFor(i,x,y).toFixed(3);if(mode==='flip'){t.className='flip-tile';t.style.setProperty('--delay',`${d}s`);const inner=document.createElement('div'),front=document.createElement('div'),back=document.createElement('div');inner.className='flip-inner';front.className='flip-face flip-front';back.className='flip-face flip-back';front.style.backgroundImage=`url(\"${photos[active].displayUrl||photos[active].displayUrl||photos[active].url}\")`;back.style.backgroundImage=`url(\"${next.displayUrl||next.displayUrl||next.url}\")`;front.style.backgroundPosition=back.style.backgroundPosition=`${x/(cols-1)*100}% ${y/(rows-1)*100}%`;inner.append(front,back);t.append(inner)}else{t.className='tile';t.style.backgroundImage=`url(\"${next.displayUrl||next.url}\")`;t.style.backgroundPosition=`${x/(cols-1)*100}% ${y/(rows-1)*100}%`;t.style.animationDelay=`${d}s`};if(mode==='scatter'){t.style.setProperty('--dx',`${(seed(i+2)-.5)*90}px`);t.style.setProperty('--dy',`${(seed(i+8)-.5)*90}px`);t.style.setProperty('--rot',`${(seed(i+15)-.5)*55}deg`)}stage.append(t)}thumbs.innerHTML='';photos.forEach((p,i)=>{const b=document.createElement('button');b.className='thumb'+(i===active?' active':'');b.innerHTML=`<img src="${p.url}" alt="${p.name}"><span>${String(i+1).padStart(2,'0')}</span>`;b.onclick=()=>{active=i;render();autoplay()};thumbs.append(b)})}
-function autoplay(){clearInterval(timer);if(playing&&photos.length>1)timer=setInterval(()=>{active=(active+1)%photos.length;render()},5200/speed)}
-document.querySelector('#files').onchange=e=>{const fs=[...e.target.files].filter(f=>f.type.startsWith('image/'));if(fs.length){photos=fs.map(f=>({url:URL.createObjectURL(f),name:f.name}));active=0;rebuildCrops();autoplay()}};document.querySelector('#caption').oninput=e=>{textValue=e.target.value;renderText()};document.querySelector('#font').onchange=e=>{textFont=e.target.value;render()};document.querySelector('#textSize').oninput=e=>{textSize=+e.target.value;render()};document.querySelector('#textColor').oninput=e=>{textColor=e.target.value;render()};document.querySelector('#textMode').onchange=e=>{textStyle=e.target.value;renderText()};document.querySelector('#play').onclick=()=>{playing=!playing;document.querySelector('#play').textContent=playing?'Ⅱ':'▶';autoplay()};document.querySelector('#density').onchange=e=>{squareGrid=e.target.value==='square';if(squareGrid)cols=12;else cols=+e.target.value;render()};document.querySelector('#ratio').onchange=e=>{ratio=+e.target.value;rebuildCrops()};document.querySelector('#mode').onchange=e=>{mode=e.target.value;render();autoplay()};document.querySelectorAll('[data-speed]').forEach(b=>b.onclick=()=>{speed=+b.dataset.speed;document.querySelectorAll('[data-speed]').forEach(x=>x.classList.toggle('active',x===b));autoplay()});
-async function rebuildCrops(){const target=ratio,needed=[active,(active+1)%Math.max(1,photos.length)];cropCache.clear();photos.forEach((p,i)=>{if(!needed.includes(i))p.displayUrl=null});await Promise.all(needed.map(async i=>{const p=photos[i];if(!p)return;const key=p.url+'|'+target;if(cropCache.has(key)){p.displayUrl=cropCache.get(key);return}const img=new Image();if(/^https?:/i.test(p.url))img.crossOrigin='anonymous';img.src=p.url;try{await img.decode();const w=720,h=Math.round(w/target),can=document.createElement('canvas');can.width=w;can.height=h;const x=can.getContext('2d'),scale=Math.max(w/img.width,h/img.height),iw=img.width*scale,ih=img.height*scale;x.drawImage(img,(w-iw)/2,(h-ih)/2,iw,ih);const out=can.toDataURL('image/jpeg',.84);cropCache.set(key,out);p.displayUrl=out}catch(e){p.displayUrl=p.url}}));render()}
-function mime(){const types=['video/mp4;codecs="avc1.42E01E"','video/mp4','video/webm;codecs=vp9','video/webm'];return types.find(t=>window.MediaRecorder&&MediaRecorder.isTypeSupported(t))||''}
-function fitImage(ctx,img,w,h){const scale=Math.max(w/img.width,h/img.height),iw=img.width*scale,ih=img.height*scale;ctx.drawImage(img,(w-iw)/2,(h-ih)/2,iw,ih)}
-async function exportVideo(){const button=document.querySelector('#export'),bar=document.querySelector('#progress'),fill=bar.querySelector('i');const type=mime();if(!type){alert('이 브라우저에서는 영상 녹화를 지원하지 않습니다. 최신 Safari 또는 Chrome에서 다시 시도해주세요.');return}button.disabled=true;bar.style.display='block';fill.style.width='0%';const canvas=document.createElement('canvas');canvas.width=ratio===.5625?608:1080;canvas.height=ratio===1.7778?608:ratio===.5625?1080:ratio===.8?1350:1080;const ctx=canvas.getContext('2d'),stream=canvas.captureStream(30),rec=new MediaRecorder(stream,{mimeType:type,videoBitsPerSecond:7000000}),chunks=[];rec.ondataavailable=e=>e.data.size&&chunks.push(e.data);const done=new Promise(resolve=>rec.onstop=resolve);rec.start(100);const duration=5200/speed,frames=Math.max(30,Math.round(duration/33));for(let f=0;f<frames;f++){const from=new Image(),to=new Image();from.crossOrigin='anonymous';to.crossOrigin='anonymous';from.src=photos[active%photos.length].url;to.src=photos[(active+1)%photos.length].url;await Promise.all([from.decode().catch(()=>{}),to.decode().catch(()=>{})]);ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#17211e';ctx.fillRect(0,0,canvas.width,canvas.height);fitImage(ctx,from,canvas.width,canvas.height);const p=f/(frames-1);const reveal=Math.min(1,p*1.35);const cellW=canvas.width/cols,cellH=canvas.height/rows;for(let i=0;i<cols*rows;i++){const x=i%cols,y=Math.floor(i/cols),d=Math.min(1,delayFor(i,x,y)/1.3),local=Math.max(0,Math.min(1,(reveal-d)/(1-d)));if(local>0){ctx.save();ctx.globalAlpha=local;ctx.beginPath();ctx.rect(x*cellW,y*cellH,cellW+.5,cellH+.5);ctx.clip();fitImage(ctx,to,canvas.width,canvas.height);ctx.restore()}}fill.style.width=`${Math.round((f+1)/frames*100)}%`;await new Promise(r=>setTimeout(r,33))}rec.stop();await done;const blob=new Blob(chunks,{type});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`mosaic-motion-${Date.now()}.${type.startsWith('video/mp4')?'mp4':'webm'}`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);button.disabled=false;setTimeout(()=>bar.style.display='none',800)}document.querySelector('#export').onclick=exportVideo;render();rebuildCrops();autoplay();
+(()=>{'use strict';
+const BUILD='v2026.08.25.20',DB_NAME='mosaic-motion-projects',DB_STORE='project',DB_KEY='current',RATIOS={'16:9':16/9,'9:16':9/16,'4:5':4/5,'1:1':1},SEGMENT_MS=1800,TRANSITION_PORTION=.72,FPS=24,$=s=>document.querySelector(s);
+const dom={canvas:$('#preview'),stage:$('#stageFrame'),counter:$('#counter'),note:$('#frameNote'),status:$('#previewStatus'),play:$('#play'),files:$('#files'),thumbs:$('#thumbs'),count:$('#count'),export:$('#export'),progress:$('#progress'),progressFill:$('#progress i'),download:$('#downloadLink'),save:$('#saveStatus')};$('#buildVersion').textContent=`BUILD ${BUILD}`;
+const defaults={photos:[],active:0,playing:true,ratio:'4:5',mode:'shape',speed:1,density:'8x6',text:{value:'',font:'Noto Sans KR',size:7,color:'#ffffff',motion:'roll',start:0,duration:4,lineHeight:1.2,tracking:-.02,x:50,y:50,opacity:1},look:{filmColor:'#263b34',filmOpacity:0,grain:0}};const state=structuredClone(defaults);let imageCache=new Map(),db=null,saveTimer=0,raf=0,playStarted=performance.now(),pausedAt=0,lastIndex=-1,lastDraw=0,previewPair=null,previewPairKey='',exporting=false;const ctx=dom.canvas.getContext('2d',{alpha:false});
+const clamp=(v,min=0,max=1)=>Math.min(max,Math.max(min,v)),easeOut=v=>1-Math.pow(1-clamp(v),3),wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));function segmentMs(){return SEGMENT_MS/state.speed}function aspect(){return RATIOS[state.ratio]}function nowTimeline(){return state.playing?pausedAt+(performance.now()-playStarted):pausedAt}function resetPlayback(){pausedAt=0;playStarted=performance.now();lastIndex=-1;previewPair=null;previewPairKey=''}function hash(n){const x=Math.sin(n*12.9898)*43758.5453;return x-Math.floor(x)}function grid(){if(state.density==='square'){const cols=10;return {cols,rows:Math.max(1,Math.round(cols/aspect()))}}const [cols,rows]=state.density.split('x').map(Number);return {cols,rows}}function modeLabel(){return {shape:'형상 우선',flip:'3D 플립 퍼즐',ripple:'리플 확산',scatter:'불규칙 분해',wave:'파도 전환'}[state.mode]}
+function delayFor(i,x,y,g){if(state.mode==='flip'||state.mode==='scatter')return hash(i+4)*.55;if(state.mode==='ripple'){const max=Math.hypot((g.cols-1)/2,(g.rows-1)/2);return Math.hypot(x-(g.cols-1)/2,y-(g.rows-1)/2)/max*.58+hash(i)*.06}if(state.mode==='wave')return x/Math.max(1,g.cols-1)*.52+y/Math.max(1,g.rows-1)*.08+hash(i)*.04;const max=Math.hypot((g.cols-1)/2,(g.rows-1)/2);return Math.hypot(x-(g.cols-1)/2,y-(g.rows-1)/2)/max*.5+hash(i)*.05}
+function photoUrl(photo){if(!photo.url)photo.url=URL.createObjectURL(photo.blob);return photo.url}function imageFor(photo){if(!photo)return Promise.reject(new Error('사진 없음'));if(imageCache.has(photo.id))return imageCache.get(photo.id);const promise=new Promise((resolve,reject)=>{const img=new Image();img.decoding='async';img.onload=()=>img.naturalWidth?resolve(img):reject(new Error('빈 사진'));img.onerror=()=>reject(new Error('사진 오류'));img.src=photoUrl(photo)});imageCache.set(photo.id,promise);return promise}function drawCover(target,image,w,h){const scale=Math.max(w/image.naturalWidth,h/image.naturalHeight),iw=image.naturalWidth*scale,ih=image.naturalHeight*scale;target.drawImage(image,(w-iw)/2,(h-ih)/2,iw,ih)}function prepareImage(image,w,h){const c=document.createElement('canvas');c.width=w;c.height=h;drawCover(c.getContext('2d',{alpha:false}),image,w,h);return c}function preparePair(from,to,w,h){return {from:prepareImage(from,w,h),to:prepareImage(to,w,h)}}function fillBackground(target,w,h){target.fillStyle='#17211e';target.fillRect(0,0,w,h)}
+function drawGrid(target,w,h,g){target.save();target.strokeStyle='#00000073';target.lineWidth=Math.max(1,w/1100);for(let x=1;x<g.cols;x++){const px=x*w/g.cols;target.beginPath();target.moveTo(px,0);target.lineTo(px,h);target.stroke()}for(let y=1;y<g.rows;y++){const py=y*h/g.rows;target.beginPath();target.moveTo(0,py);target.lineTo(w,py);target.stroke()}target.restore()}
+function trackedWidth(target,text,tracking){return Array.from(text).reduce((sum,char,index)=>sum+target.measureText(char).width+(index?tracking:0),0)}function wrapLine(target,line,maxWidth,tracking){if(!line)return [''];const result=[];let current='';for(const char of Array.from(line)){const candidate=current+char;if(current&&trackedWidth(target,candidate,tracking)>maxWidth){result.push(current);current=char}else current=candidate}if(current||!result.length)result.push(current);return result}function drawTracked(target,line,x,y,tracking,alpha,rollMs,indexStart){const chars=Array.from(line),total=trackedWidth(target,line,tracking);let cursor=x-total/2;chars.forEach((char,index)=>{const delay=Math.min((indexStart+index)*34,650),p=rollMs===null?1:easeOut((rollMs-delay)/320);if(p>0){target.globalAlpha=alpha*p;target.fillText(char,cursor,y+(1-p)*target.measureText('M').width*.85)}cursor+=target.measureText(char).width+tracking});return indexStart+chars.length}
+function drawText(target,w,h,globalMs,clipAlpha=1){const t=state.text,start=t.start*1000,end=start+t.duration*1000;if(!t.value.trim()||globalMs<start||globalMs>=end)return;const fontSize=Math.max(20,Math.round(w*t.size/100)),tracking=fontSize*t.tracking;target.save();target.font=`800 ${fontSize}px "${t.font}", Arial, sans-serif`;target.textAlign='left';target.textBaseline='middle';target.fillStyle=t.color;target.shadowColor='#000b';target.shadowBlur=Math.max(5,fontSize*.25);const lines=t.value.split('\n').flatMap(line=>wrapLine(target,line,w*.9,tracking)),lineGap=fontSize*t.lineHeight,baseY=h*t.y/100-(lines.length-1)*lineGap/2;let charIndex=0,rollMs=t.motion==='roll'?globalMs-start:null;lines.forEach((line,index)=>{charIndex=drawTracked(target,line,w*t.x/100,baseY+index*lineGap,tracking,t.opacity*clipAlpha,rollMs,charIndex)});target.restore()}
+function drawLook(target,w,h,seed){const look=state.look;if(look.filmOpacity>0){target.save();target.globalAlpha=look.filmOpacity;target.fillStyle=look.filmColor;target.fillRect(0,0,w,h);target.restore()}if(look.grain>0){target.save();target.globalAlpha=look.grain*.22;for(let i=0;i<Math.round(100+look.grain*500);i++){const n=hash(seed*997+i*17);target.fillStyle=n>.5?'#fff':'#000';target.fillRect(hash(seed*31+i*7)*w,hash(seed*73+i*13)*h,1.2,1.2)}target.restore()}}
+function drawFrame(target,w,h,pair,progress,globalMs,seed){const g=grid(),cellW=w/g.cols,cellH=h/g.rows,reveal=clamp(progress/TRANSITION_PORTION);fillBackground(target,w,h);target.drawImage(pair.from,0,0,w,h);for(let i=0;i<g.cols*g.rows;i++){const x=i%g.cols,y=Math.floor(i/g.cols),delay=delayFor(i,x,y,g),local=clamp((reveal-delay)/(1-delay));if(!local)continue;const left=x*cellW,top=y*cellH;target.save();target.beginPath();target.rect(left,top,cellW+.5,cellH+.5);target.clip();if(state.mode==='flip'){target.fillStyle='#111b17';target.globalAlpha=.2;target.fillRect(left,top,cellW,cellH);target.globalAlpha=1;if(local<.5){const narrow=Math.max(.02,1-local*2);target.translate(left+cellW/2,top+cellH/2);target.scale(narrow,1);target.drawImage(pair.from,-cellW/2,-cellH/2,cellW,cellH)}else{const narrow=Math.max(.02,(local-.5)*2);target.translate(left+cellW/2,top+cellH/2);target.scale(narrow,1);target.drawImage(pair.to,-cellW/2,-cellH/2,cellW,cellH)}}else{let dx=0,dy=0;if(state.mode==='scatter'){dx=(hash(i+20)-.5)*(1-local)*cellW*1.5;dy=(hash(i+60)-.5)*(1-local)*cellH*1.5}target.globalAlpha=local;target.drawImage(pair.to,dx,dy,w,h)}target.restore();if(state.text.motion==='overlay'&&local>0){target.save();target.beginPath();target.rect(left,top,cellW+.5,cellH+.5);target.clip();drawText(target,w,h,globalMs,local);target.restore()}}drawLook(target,w,h,seed);if(state.text.motion!=='overlay')drawText(target,w,h,globalMs);drawGrid(target,w,h,g)}
+function resizePreview(){const rect=dom.canvas.getBoundingClientRect(),width=Math.min(1100,Math.max(2,Math.round(rect.width*Math.min(window.devicePixelRatio||1,2)))),height=Math.round(width/aspect());if(dom.canvas.width!==width||dom.canvas.height!==height){dom.canvas.width=width;dom.canvas.height=height;previewPair=null;previewPairKey=''}dom.stage.style.setProperty('--aspect',String(aspect()))}
+async function renderPreview(){resizePreview();const w=dom.canvas.width,h=dom.canvas.height;if(!state.photos.length){fillBackground(ctx,w,h);ctx.fillStyle='#cad2cd';ctx.font=`600 ${Math.max(16,w*.035)}px Arial`;ctx.textAlign='center';ctx.fillText('사진을 추가해보세요',w/2,h/2);dom.counter.textContent='00 / 00';dom.note.textContent='사진을 추가해보세요';return}const total=state.photos.length,time=nowTimeline(),index=(state.active+Math.floor(time/segmentMs()))%total,progress=time%segmentMs()/segmentMs();try{const [from,to]=await Promise.all([imageFor(state.photos[index]),imageFor(state.photos[(index+1)%total])]);const key=`${state.photos[index].id}|${state.photos[(index+1)%total].id}|${w}|${h}`;if(previewPairKey!==key){previewPair=preparePair(from,to,w,h);previewPairKey=key}drawFrame(ctx,w,h,previewPair,progress,time,Math.floor(time/45));dom.counter.textContent=`${String(index+1).padStart(2,'0')} / ${String(total).padStart(2,'0')}`;dom.note.textContent=`${modeLabel()} 전환 중`;if(index!==lastIndex){lastIndex=index;renderThumbs()}}catch(error){fillBackground(ctx,w,h);ctx.fillStyle='#fff';ctx.textAlign='center';ctx.font='16px Arial';ctx.fillText('사진을 불러오지 못했습니다',w/2,h/2);dom.status.textContent='문제가 있는 사진은 제거한 뒤 다시 추가해주세요.'}}
+async function loop(time){if(time-lastDraw>33){lastDraw=time;await renderPreview()}raf=requestAnimationFrame(loop)}
+function renderThumbs(){dom.thumbs.innerHTML='';dom.count.textContent=`${state.photos.length} PHOTOS`;if(!state.photos.length){const empty=document.createElement('span');empty.className='empty-thumbs';empty.textContent='추가된 사진이 여기에 표시됩니다.';dom.thumbs.append(empty);return}const activeIndex=(state.active+Math.floor(nowTimeline()/segmentMs()))%state.photos.length;state.photos.forEach((photo,index)=>{const button=document.createElement('button');button.className='thumb'+(index===activeIndex?' active':'');button.type='button';const image=document.createElement('img');image.src=photoUrl(photo);image.alt=photo.name;const number=document.createElement('span');number.className='number';number.textContent=String(index+1).padStart(2,'0');const remove=document.createElement('button');remove.className='remove';remove.type='button';remove.textContent='×';remove.setAttribute('aria-label',`${photo.name} 제거`);remove.onclick=event=>{event.stopPropagation();removePhoto(photo.id)};button.append(image,number,remove);button.onclick=()=>{state.active=index;resetPlayback();renderThumbs();scheduleSave()};dom.thumbs.append(button)})}
+function updateReadouts(){const t=state.text,l=state.look;$('#textSizeValue').textContent=`${t.size.toFixed(2)}%`;$('#textStartValue').textContent=`${t.start.toFixed(1)}초`;$('#textDurationValue').textContent=`${t.duration.toFixed(1)}초`;$('#lineHeightValue').textContent=t.lineHeight.toFixed(2);$('#trackingValue').textContent=`${t.tracking.toFixed(2)}em`;$('#textXValue').textContent=`${t.x}%`;$('#textYValue').textContent=`${t.y}%`;$('#textOpacityValue').textContent=`${Math.round(t.opacity*100)}%`;$('#filmOpacityValue').textContent=`${Math.round(l.filmOpacity*100)}%`;$('#grainValue').textContent=`${Math.round(l.grain*100)}%`}
+function resetUiValues(){const t=state.text,l=state.look;$('#caption').value=t.value;$('#font').value=t.font;$('#textSize').value=t.size;$('#textColor').value=t.color;$('#textMotion').value=t.motion;$('#textStart').value=t.start;$('#textDuration').value=t.duration;$('#lineHeight').value=t.lineHeight;$('#tracking').value=t.tracking;$('#textX').value=t.x;$('#textY').value=t.y;$('#textOpacity').value=t.opacity;$('#ratio').value=state.ratio;$('#mode').value=state.mode;$('#density').value=state.density;$('#filmColor').value=l.filmColor;$('#filmOpacity').value=l.filmOpacity;$('#grain').value=l.grain;updateReadouts();document.querySelectorAll('[data-speed]').forEach(button=>button.classList.toggle('active',Number(button.dataset.speed)===state.speed));dom.play.textContent=state.playing?'Ⅱ':'▶';dom.export.disabled=!state.photos.length||exporting}
+function snapshot(){return {photos:state.photos.map(photo=>({id:photo.id,name:photo.name,blob:photo.blob})),active:state.active,ratio:state.ratio,mode:state.mode,speed:state.speed,density:state.density,text:{...state.text},look:{...state.look},updatedAt:Date.now()}}
+function openDb(){return new Promise((resolve,reject)=>{const request=indexedDB.open(DB_NAME,1);request.onupgradeneeded=()=>{if(!request.result.objectStoreNames.contains(DB_STORE))request.result.createObjectStore(DB_STORE)};request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error)})}
+async function writeProject(){if(!db)return;try{const tx=db.transaction(DB_STORE,'readwrite');tx.objectStore(DB_STORE).put(snapshot(),DB_KEY);await new Promise((resolve,reject)=>{tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});dom.save.textContent='기기에 자동 저장됨'}catch(error){dom.save.textContent='자동 저장에 실패했습니다. 백업 저장을 사용해주세요.'}}function scheduleSave(){clearTimeout(saveTimer);dom.save.textContent='저장 중…';saveTimer=setTimeout(writeProject,700)}
+function normalizeRestored(data){if(!data||!Array.isArray(data.photos))return false;state.photos=data.photos.filter(photo=>photo?.blob).map(photo=>({id:photo.id||crypto.randomUUID(),name:photo.name||'photo',blob:photo.blob,url:null}));state.active=Math.min(Math.max(0,data.active||0),Math.max(0,state.photos.length-1));state.ratio=RATIOS[data.ratio]?data.ratio:state.ratio;state.mode=['shape','flip','ripple','scatter','wave'].includes(data.mode)?data.mode:state.mode;state.speed=[.6,1,1.5].includes(Number(data.speed))?Number(data.speed):state.speed;state.density=['6x6','8x6','10x6','square'].includes(data.density)?data.density:(data.squareGrid?'square':data.cols===6?'6x6':data.cols===10?'10x6':'8x6');Object.assign(state.text,data.text||{});Object.assign(state.look,data.look||{});if(data.textValue!==undefined){Object.assign(state.text,{value:data.textValue,font:data.textFont||state.text.font,size:data.textSize||state.text.size,color:data.textColor||state.text.color,motion:data.textStyle||state.text.motion,start:data.textStart??state.text.start,duration:data.textDuration??state.text.duration,lineHeight:data.textLineHeight??state.text.lineHeight,tracking:data.textLetterSpacing??state.text.tracking,x:data.textX??state.text.x,y:data.textY??state.text.y,opacity:data.textOpacity??state.text.opacity});Object.assign(state.look,{filmColor:data.filmColor||state.look.filmColor,filmOpacity:data.filmOpacity??state.look.filmOpacity,grain:data.grainOpacity??state.look.grain})}return true}
+async function restoreProject(){try{db=await openDb();const tx=db.transaction(DB_STORE,'readonly'),request=tx.objectStore(DB_STORE).get(DB_KEY),data=await new Promise((resolve,reject)=>{request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error)});if(normalizeRestored(data)){resetUiValues();renderThumbs();resetPlayback();dom.save.textContent='저장된 작업을 복원했습니다.'}else dom.save.textContent='기기 자동 저장 사용 가능'}catch(error){dom.save.textContent='자동 저장을 사용할 수 없습니다. 백업 저장을 사용해주세요.'}}
+function addFiles(files){const incoming=[...files].filter(file=>file.type.startsWith('image/'));if(!incoming.length)return;incoming.forEach(file=>state.photos.push({id:crypto.randomUUID(),name:file.name,blob:file,url:null}));state.active=Math.max(0,state.photos.length-incoming.length);dom.download.style.display='none';resetUiValues();renderThumbs();resetPlayback();scheduleSave();dom.status.textContent=`${incoming.length}장을 추가했습니다. 미리보기 순서가 영상 순서입니다.`}function removePhoto(id){const index=state.photos.findIndex(photo=>photo.id===id);if(index<0)return;const [removed]=state.photos.splice(index,1);if(removed.url)URL.revokeObjectURL(removed.url);imageCache.delete(id);state.active=Math.min(state.active,Math.max(0,state.photos.length-1));resetPlayback();resetUiValues();renderThumbs();scheduleSave();dom.status.textContent='사진을 제거했습니다.'}
+function bindControls(){dom.files.addEventListener('change',event=>{addFiles(event.target.files);event.target.value=''});dom.play.onclick=()=>{state.playing=!state.playing;if(state.playing)playStarted=performance.now();else pausedAt+=performance.now()-playStarted;resetUiValues()};$('#caption').oninput=event=>{state.text.value=event.target.value;resetPlayback();scheduleSave()};[['#font','font',String],['#textSize','size',Number],['#textColor','color',String],['#textMotion','motion',String],['#textStart','start',Number],['#textDuration','duration',Number],['#lineHeight','lineHeight',Number],['#tracking','tracking',Number],['#textX','x',Number],['#textY','y',Number],['#textOpacity','opacity',Number]].forEach(([selector,key,parse])=>{$(selector).addEventListener('input',event=>{state.text[key]=parse(event.target.value);updateReadouts();resetPlayback();scheduleSave()})});$('#ratio').onchange=event=>{state.ratio=event.target.value;resetPlayback();scheduleSave()};$('#mode').onchange=event=>{state.mode=event.target.value;resetPlayback();scheduleSave()};$('#density').onchange=event=>{state.density=event.target.value;resetPlayback();scheduleSave()};document.querySelectorAll('[data-speed]').forEach(button=>button.onclick=()=>{state.speed=Number(button.dataset.speed);resetUiValues();resetPlayback();scheduleSave()});[['#filmColor','filmColor',String],['#filmOpacity','filmOpacity',Number],['#grain','grain',Number]].forEach(([selector,key,parse])=>{$(selector).addEventListener('input',event=>{state.look[key]=parse(event.target.value);updateReadouts();scheduleSave()})});window.addEventListener('resize',resizePreview);window.addEventListener('pagehide',writeProject)}
+function backupDataUrl(blob){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(reader.error);reader.readAsDataURL(blob)})}function dataUrlBlob(dataUrl){const [header,body]=dataUrl.split(','),bytes=atob(body),out=new Uint8Array(bytes.length);for(let i=0;i<bytes.length;i++)out[i]=bytes.charCodeAt(i);return new Blob([out],{type:(header.match(/data:(.*?);/)||[])[1]||'image/jpeg'})}
+async function exportBackup(){const button=$('#backupExport');button.disabled=true;button.textContent='백업 생성 중…';try{const photos=await Promise.all(state.photos.map(async photo=>({id:photo.id,name:photo.name,dataUrl:await backupDataUrl(photo.blob)}))),backup={app:'mosaic-motion',version:BUILD,createdAt:new Date().toISOString(),settings:snapshot(),photos},blob=new Blob([JSON.stringify(backup)],{type:'application/json'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=`mosaic-motion-backup-${Date.now()}.json`;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);dom.save.textContent='백업 파일을 저장했습니다.'}catch(error){dom.save.textContent='백업 파일을 만들지 못했습니다.'}button.disabled=false;button.textContent='작업 백업 저장'}
+async function importBackup(file){try{const backup=JSON.parse(await file.text());if(backup.app!=='mosaic-motion'||!Array.isArray(backup.photos))throw new Error('invalid');state.photos=await Promise.all(backup.photos.map(async photo=>{let blob;if(photo.dataUrl)blob=dataUrlBlob(photo.dataUrl);else if(photo.url){const response=await fetch(photo.url);if(!response.ok)throw new Error('image');blob=await response.blob()}else throw new Error('image');return {id:photo.id||crypto.randomUUID(),name:photo.name||'photo',blob,url:null}}));imageCache=new Map();normalizeRestored({...backup.settings,photos:state.photos.map(photo=>({id:photo.id,name:photo.name,blob:photo.blob}))});resetUiValues();renderThumbs();resetPlayback();await writeProject();dom.save.textContent='백업을 복원했습니다.';dom.status.textContent='사진과 편집값을 모두 복원했습니다.'}catch(error){dom.save.textContent='백업 파일을 읽지 못했습니다.'}}
+function bindBackup(){$('#backupExport').onclick=exportBackup;$('#backupImportButton').onclick=()=>$('#backupImport').click();$('#backupImport').onchange=event=>{const file=event.target.files?.[0];if(file)importBackup(file);event.target.value=''}}function recorderType(){return ['video/mp4;codecs="avc1.42E01E"','video/mp4','video/webm;codecs=vp9','video/webm'].find(type=>window.MediaRecorder&&MediaRecorder.isTypeSupported(type))||''}function outputSize(){return state.ratio==='16:9'?{w:1920,h:1080}:state.ratio==='9:16'?{w:1080,h:1920}:state.ratio==='4:5'?{w:1080,h:1350}:{w:1080,h:1080}}
+async function exportVideo(){if(exporting||!state.photos.length)return;const type=recorderType();if(!type){dom.status.textContent='이 브라우저는 MP4 녹화를 지원하지 않습니다.';return}exporting=true;resetUiValues();dom.progress.style.display='block';dom.progressFill.style.width='0%';dom.download.style.display='none';dom.status.textContent=`${state.photos.length}장의 사진을 영상으로 준비하는 중…`;let recorder;try{const images=[];for(let i=0;i<state.photos.length;i++){images.push(await imageFor(state.photos[i]));dom.status.textContent=`사진 불러오는 중 ${i+1} / ${state.photos.length}`}const {w,h}=outputSize(),canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;const output=canvas.getContext('2d',{alpha:false}),stream=canvas.captureStream(FPS);recorder=new MediaRecorder(stream,{mimeType:type,videoBitsPerSecond:12000000});const chunks=[];recorder.ondataavailable=event=>{if(event.data.size)chunks.push(event.data)};const completed=new Promise(resolve=>recorder.onstop=resolve);recorder.start(250);const frames=Math.round(segmentMs()/1000*FPS),totalFrames=frames*images.length;for(let index=0;index<images.length;index++){const pair=preparePair(images[index],images[(index+1)%images.length],w,h);for(let frame=0;frame<frames;frame++){const scheduled=performance.now()+1000/FPS,progress=frame/Math.max(1,frames-1),globalMs=index*segmentMs()+frame/FPS*1000;drawFrame(output,w,h,pair,progress,globalMs,index*frames+frame);dom.progressFill.style.width=`${Math.round((index*frames+frame+1)/totalFrames*100)}%`;await wait(Math.max(0,scheduled-performance.now()))}}recorder.stop();await completed;const blob=new Blob(chunks,{type}),extension=type.startsWith('video/mp4')?'mp4':'webm',url=URL.createObjectURL(blob);dom.download.href=url;dom.download.download=`mosaic-motion-${Date.now()}.${extension}`;dom.download.style.display='block';dom.download.textContent=`생성 완료 — ${extension.toUpperCase()} 영상 저장하기`;dom.download.click();dom.status.textContent=`${state.photos.length}장 전체가 포함된 영상을 만들었습니다. 자동 저장이 열리지 않으면 아래 버튼을 한 번 눌러주세요.`}catch(error){try{if(recorder?.state==='recording')recorder.stop()}catch(_){}dom.status.textContent='영상 생성에 실패했습니다. 문제가 있는 사진을 제거한 뒤 다시 시도해주세요.'}finally{exporting=false;resetUiValues();setTimeout(()=>dom.progress.style.display='none',1000)}}
+$('#export').onclick=exportVideo;async function initialize(){bindControls();bindBackup();resetUiValues();renderThumbs();await restoreProject();cancelAnimationFrame(raf);raf=requestAnimationFrame(loop)}initialize();
+})();
 </script>
-<style>
-/* Mobile editing polish and interaction fixes */
-.flip-back{transform:rotateY(180deg)!important;}
-.text-controls #textColor{width:54px;height:34px;padding:3px;border:1px solid var(--line);border-radius:8px;background:#fff;}
-.text-controls input[type=range]{width:150px;accent-color:#8ea63e;}
-.text-controls .row{gap:12px;min-height:34px;}
-.text-overlay .roll-line{line-height:1.16;letter-spacing:-.025em;}
-.text-overlay .roll-char{height:1.16em;}
-.text-overlay.roll .roll-char span{animation:textRollIn .8s cubic-bezier(.16,.8,.35,1) both;}
-.thumb{overflow:visible;}
-.thumb-remove{position:absolute;right:-6px;top:-7px;width:20px;height:20px;border:1px solid #fff;background:#17211e;color:#d8ef79;border-radius:50%;font-size:14px;line-height:16px;padding:0;z-index:3;}
-.stagebox{position:sticky;top:16px;align-self:start;}
-.hero h1{line-height:1.12;letter-spacing:-.045em;}
-.intro{line-height:1.95;}
-@media(max-width:720px){
-  .stagebox{top:0;padding:10px 0 12px;background:var(--paper);z-index:20;}
-  .hero h1{font-size:clamp(34px,9.5vw,50px);line-height:1.18;letter-spacing:-.045em;}
-  .intro{font-size:13px;line-height:1.9;}
-  .text-overlay{padding:24px;}
-  .text-overlay .roll-line{font-size:clamp(24px,8vw,58px);line-height:1.22;letter-spacing:-.025em;}
-  .text-overlay .roll-char{height:1.22em;}
-  .text-controls .row{align-items:center;}
-  /* iOS Safari zooms controls whose font-size is below 16px. */
-  .settings select,.text-controls select,.text-controls input[type=text]{font-size:16px;}
-  .speed button{font-size:16px;}
-}
-</style>
-<script>
-// Add the mobile controls that were missing from the first version.
-const captionInput=document.querySelector('#caption');
-captionInput.removeAttribute('maxlength');
-captionInput.placeholder='예: 여름의 조각들 · 원하는 만큼 입력';
-
-const fontSelect=document.querySelector('#font');
-const extraFonts=[
-  ['Pretendard, sans-serif','Pretendard'],
-  ['Inter, sans-serif','Inter'],
-  ['Manrope, sans-serif','Manrope'],
-  ['Plus Jakarta Sans, sans-serif','Plus Jakarta Sans'],
-  ['Montserrat, sans-serif','Montserrat'],
-  ['Gowun Dodum, sans-serif','Gowun Dodum'],
-  ['Nanum Gothic, sans-serif','Nanum Gothic'],
-  ['Black Han Sans, sans-serif','Black Han Sans'],
-  ['Nanum Myeongjo, serif','Nanum Myeongjo']
-];
-extraFonts.forEach(([value,label])=>{if(![...fontSelect.options].some(o=>o.value===value)){const o=document.createElement('option');o.value=value;o.textContent=label;fontSelect.append(o)}});
-const fontLink=document.createElement('link');fontLink.rel='stylesheet';fontLink.href='https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Gowun+Dodum&family=Inter:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&family=Nanum+Gothic:wght@400;700&family=Nanum+Myeongjo:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap';document.head.append(fontLink);
-
-document.querySelector('.eyebrow').textContent='PHOTO / MOTION / 01';
-document.querySelector('.hero h1').innerHTML='장면 사이에<br><em>움직임을 더하다.</em>';
-document.querySelector('.intro').textContent='사진을 고르고, 조각의 리듬을 설계하세요.';
-document.querySelector('#export').textContent='MP4로 저장해 보세요';
-document.querySelector('.tip').textContent='사진은 기기에서만 처리됩니다. 원본 비율은 유지되고 넘치는 부분만 잘립니다.';
-
-function decorateThumbs(){
-  thumbs.querySelectorAll('.thumb').forEach((button,index)=>{
-    if(button.querySelector('.thumb-remove'))return;
-    const remove=document.createElement('button');remove.type='button';remove.className='thumb-remove';remove.setAttribute('aria-label',`${index+1}번 사진 삭제`);remove.textContent='×';
-    remove.onclick=(event)=>{event.preventDefault();event.stopPropagation();if(photos.length<=1){alert('사진은 최소 1장 이상 남겨주세요.');return}const removed=photos.splice(index,1)[0];if(removed.url.startsWith('blob:'))URL.revokeObjectURL(removed.url);if(active>=photos.length)active=photos.length-1;render();autoplay()};
-    button.append(remove);
-  });
-}
-const originalRender=render;
-render=function(){originalRender();decorateThumbs();};
-render();
-</script>
-<script>
-// Guarantee a clean, undistorted full-image state after the tile flip finishes.
-let flipSettleTimer;
-const decoratedRender=render;
-render=function(){
-  clearTimeout(flipSettleTimer);
-  decoratedRender();
-  if(mode==='flip'&&photos.length>1){
-    const next=photos[(active+1)%photos.length];
-    flipSettleTimer=setTimeout(()=>{
-      backdrop.style.backgroundImage=`url("${next.displayUrl||next.url}")`;
-      stage.querySelectorAll('.flip-tile').forEach(tile=>tile.remove());
-    },2150);
-  }
-};
-render();
-</script>
-<style>
-.flip-final{position:absolute;inset:0;z-index:1;background-position:center;background-size:cover;background-repeat:no-repeat;opacity:0;animation:flipFinalIn .18s ease-out forwards;}
-@keyframes flipFinalIn{from{opacity:0}to{opacity:1}}
-</style>
-<script>
-// The tiles are transition-only. The settled state is always one complete image.
-clearTimeout(flipSettleTimer);
-const settledRender=render;
-render=function(){
-  clearTimeout(flipSettleTimer);
-  stage.querySelectorAll('.flip-final').forEach(layer=>layer.remove());
-  settledRender();
-  if(mode==='flip'&&photos.length>1){
-    const next=photos[(active+1)%photos.length];
-    flipSettleTimer=setTimeout(()=>{
-      const finalLayer=document.createElement('div');
-      finalLayer.className='flip-final';
-      finalLayer.style.backgroundImage=`url("${next.displayUrl||next.url}")`;
-      stage.append(finalLayer);
-      stage.querySelectorAll('.flip-tile').forEach(tile=>tile.remove());
-    },2150);
-  }
-};
-render();
-</script>
-<style>
-/* Stable flip-puzzle implementation: the image swaps at the fold midpoint,
-   so the next photo is never mirrored or spatially remapped. */
-.stage.flip .flip-tile{display:none!important;}
-.stage.flip .flip-safe{position:relative;z-index:1;perspective:900px;transform-style:preserve-3d;opacity:0;background-repeat:no-repeat;background-size:calc(var(--cols)*100%) calc(var(--rows)*100%);border-right:1px solid #0005;border-bottom:1px solid #0005;animation:flipSafe .94s cubic-bezier(.22,.72,.25,1) both;animation-delay:var(--safe-delay);}
-@keyframes flipSafe{0%{opacity:0;transform:rotateY(0deg) scale(.98)}18%{opacity:1}48%{transform:rotateY(88deg) scale(.985);filter:brightness(1.55)}52%{transform:rotateY(92deg) scale(.985);filter:brightness(1.55)}100%{opacity:1;transform:rotateY(0deg) scale(1);filter:none}}
-.build-version{margin-left:auto;margin-right:12px;color:#8ea63e;font-size:9px;letter-spacing:.1em;white-space:nowrap;}
-@media(max-width:720px){.build-version{font-size:8px;margin-right:0;}.privacy{display:none!important;}}
-</style>
-<script>
-const BUILD_VERSION='v2026.08.25.05';
-const versionBadge=document.createElement('span');versionBadge.className='build-version';versionBadge.textContent=`BUILD ${BUILD_VERSION}`;document.querySelector('.top').append(versionBadge);
-
-let safeFlipTimers=[];
-const previousRender=render;
-render=function(){
-  safeFlipTimers.forEach(clearTimeout);safeFlipTimers=[];
-  clearTimeout(flipSettleTimer);
-  stage.querySelectorAll('.flip-safe,.flip-final').forEach(layer=>layer.remove());
-  previousRender();
-  if(mode!=='flip'||photos.length<2)return;
-  const current=photos[active],next=photos[(active+1)%photos.length];
-  const currentUrl=current.displayUrl||current.url,nextUrl=next.displayUrl||next.url;
-  for(let i=0;i<cols*rows;i++){
-    const x=i%cols,y=Math.floor(i/cols),tile=document.createElement('div');
-    const delay=delayFor(i,x,y);tile.className='flip-safe';tile.style.setProperty('--safe-delay',`${delay}s`);
-    tile.style.backgroundImage=`url("${currentUrl}")`;tile.style.backgroundPosition=`${cols===1?0:x/(cols-1)*100}% ${rows===1?0:y/(rows-1)*100}%`;
-    stage.append(tile);
-    safeFlipTimers.push(setTimeout(()=>{tile.style.backgroundImage=`url("${nextUrl}")`},(delay+.46)*1000));
-  }
-  safeFlipTimers.push(setTimeout(()=>{
-    const finalLayer=document.createElement('div');finalLayer.className='flip-final';finalLayer.style.backgroundImage=`url("${nextUrl}")`;stage.append(finalLayer);
-    stage.querySelectorAll('.flip-safe,.flip-tile').forEach(tile=>tile.remove());
-  },2150));
-};
-render();
-</script>
-<style>
-.text-overlay .roll-line{line-height:1.2;}
-.text-overlay .roll-char{height:1.2em;min-width:.28em;position:relative;overflow:hidden;vertical-align:top;}
-.text-overlay .roll-char .roll-current,.text-overlay .roll-char .roll-next{position:absolute;left:0;top:0;width:100%;display:block;min-width:100%;}
-.text-overlay .roll-char .roll-current{transform:translateY(0);}
-.text-overlay .roll-char .roll-next{transform:translateY(105%);}
-.text-overlay.text-enter .roll-char .roll-current{animation:rollOut .62s cubic-bezier(.16,.8,.35,1) both;animation-delay:calc(var(--i)*.035s);}
-.text-overlay.text-enter .roll-char .roll-next{animation:rollIn .62s cubic-bezier(.16,.8,.35,1) both;animation-delay:calc(var(--i)*.035s);}
-@keyframes rollOut{from{transform:translateY(0);opacity:1}to{transform:translateY(-105%);opacity:0}}
-@keyframes rollIn{from{transform:translateY(105%);opacity:0}to{transform:translateY(0);opacity:1}}
-.timing-controls{display:grid;gap:8px;padding-top:4px;}
-.timing-controls .timing-value{color:#8ea63e;font-variant-numeric:tabular-nums;}
-.timing-controls input[type=range]{width:150px;accent-color:#8ea63e;}
-@media(max-width:720px){.timing-controls input[type=range]{width:135px;}}
-</style>
-<script>
-const TEXT_VERSION='v2026.08.25.06';
-const badge=document.querySelector('.build-version');if(badge){badge.textContent=`BUILD ${TEXT_VERSION}`;}
-let textStart=0.6,textDuration=3.2,textTimingTimers=[];
-const timingBox=document.createElement('div');timingBox.className='timing-controls';timingBox.innerHTML=`<div class="row"><span>표시 시작</span><span><input id="textStart" type="range" min="0" max="4.8" step=".1" value=".6"><span class="timing-value" id="textStartValue">0.6초</span></span></div><div class="row"><span>표시 시간</span><span><input id="textDuration" type="range" min=".4" max="5.2" step=".1" value="3.2"><span class="timing-value" id="textDurationValue">3.2초</span></span></div>`;
-document.querySelector('.text-controls').append(timingBox);
-const textStartInput=document.querySelector('#textStart'),textDurationInput=document.querySelector('#textDuration');
-function scheduleTextWindow(){
-  textTimingTimers.forEach(clearTimeout);textTimingTimers=[];
-  if(!textValue.trim()){textOverlay.style.opacity='';return;}
-  const cycle=Math.max(1.2,5200/speed/1000),start=Math.min(textStart,cycle-.2),duration=Math.min(textDuration,cycle-start);
-  textOverlay.style.opacity='0';
-  textTimingTimers.push(setTimeout(()=>{textOverlay.style.opacity='1';textOverlay.classList.remove('text-enter');void textOverlay.offsetWidth;textOverlay.classList.add('text-enter');},start*1000));
-  textTimingTimers.push(setTimeout(()=>{textOverlay.style.opacity='0';},(start+duration)*1000));
-}
-function renderTextWithRoll(){
-  textOverlay.style.setProperty('--text-size',`${textSize}vw`);textOverlay.style.setProperty('--text-color',textColor);textOverlay.style.setProperty('--text-font',textFont);
-  if(textStyle!=='roll'){baseRenderText();scheduleTextWindow();return;}
-  textOverlay.innerHTML='';textOverlay.className='text-overlay roll';
-  const line=document.createElement('div');line.className='roll-line';
-  [...textValue].forEach((ch,i)=>{const holder=document.createElement('span');holder.className='roll-char';holder.style.setProperty('--i',i);const current=document.createElement('span'),next=document.createElement('span');current.className='roll-current';next.className='roll-next';current.textContent=ch===' '?'\u00a0':ch;next.textContent=ch===' '?'\u00a0':ch;holder.append(current,next);line.append(holder)});
-  textOverlay.append(line);scheduleTextWindow();
-}
-const baseRenderText=renderText;renderText=renderTextWithRoll;
-textStartInput.oninput=()=>{textStart=+textStartInput.value;document.querySelector('#textStartValue').textContent=`${textStart.toFixed(1)}초`;scheduleTextWindow()};
-textDurationInput.oninput=()=>{textDuration=+textDurationInput.value;document.querySelector('#textDurationValue').textContent=`${textDuration.toFixed(1)}초`;scheduleTextWindow()};
-render();
-</script>
-<style>
-.film-overlay{position:absolute;inset:0;z-index:1.5;pointer-events:none;mix-blend-mode:multiply;background:#000;opacity:0;}
-.film-overlay::after{content:"";position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.9'/%3E%3C/svg%3E");background-size:180px 180px;mix-blend-mode:screen;opacity:var(--grain-opacity,0);}
-.look-controls{padding:15px 0 13px;border-bottom:1px solid var(--line);display:grid;gap:10px;font-size:11px;}
-.look-controls .row{min-height:34px;gap:12px;}
-.look-controls input[type=range]{width:150px;accent-color:#8ea63e;}
-.look-controls input[type=color]{width:54px;height:34px;padding:3px;border:1px solid var(--line);border-radius:8px;background:#fff;}
-.look-value{color:#8ea63e;font-variant-numeric:tabular-nums;}
-.tile-text-grid{position:absolute;inset:0;z-index:4;display:grid;grid-template-columns:repeat(var(--cols),1fr);grid-template-rows:repeat(var(--rows),1fr);pointer-events:none;}
-.tile-text-cell{position:relative;overflow:hidden;}
-.tile-text-inner{position:absolute;left:calc(var(--tx) * -100%);top:calc(var(--ty) * -100%);width:calc(var(--cols) * 100%);height:calc(var(--rows) * 100%);display:flex;align-items:center;justify-content:center;padding:24px;color:var(--text-color);font-family:var(--text-font);font-size:var(--text-size);font-weight:800;line-height:1.2;letter-spacing:-.025em;text-align:center;white-space:pre-wrap;text-shadow:0 2px 16px #0009;}
-.tile-text-cell{animation:flipSafe .94s cubic-bezier(.22,.72,.25,1) both;animation-delay:var(--safe-delay);}
-@media(max-width:720px){.look-controls input[type=range]{width:135px;}.tile-text-inner{padding:24px;line-height:1.24;letter-spacing:-.02em;}}
-</style>
-<script>
-const LOOK_VERSION='v2026.08.25.07';
-const latestBadge=document.querySelector('.build-version');if(latestBadge)latestBadge.textContent=`BUILD ${LOOK_VERSION}`;
-let filmColor='#263b34',filmOpacity=0,grainOpacity=0;
-const filmLayer=document.createElement('div');filmLayer.className='film-overlay';stage.append(filmLayer);
-const lookControls=document.createElement('div');lookControls.className='look-controls';lookControls.innerHTML=`<div class="row"><span>필름지 색상</span><input id="filmColor" type="color" value="#263b34"></div><div class="row"><span>필름지 투명도</span><span><input id="filmOpacity" type="range" min="0" max=".7" step=".01" value="0"><span class="look-value" id="filmOpacityValue">0%</span></span></div><div class="row"><span>그레인</span><span><input id="grainOpacity" type="range" min="0" max=".45" step=".01" value="0"><span class="look-value" id="grainOpacityValue">0%</span></span></div>`;document.querySelector('.settings').after(lookControls);
-const filmColorInput=document.querySelector('#filmColor'),filmOpacityInput=document.querySelector('#filmOpacity'),grainOpacityInput=document.querySelector('#grainOpacity');
-function syncLook(){filmLayer.style.backgroundColor=filmColor;filmLayer.style.opacity=filmOpacity;filmLayer.style.setProperty('--grain-opacity',grainOpacity);document.querySelector('#filmOpacityValue').textContent=`${Math.round(filmOpacity*100)}%`;document.querySelector('#grainOpacityValue').textContent=`${Math.round(grainOpacity/.45*100)}%`;}
-filmColorInput.oninput=()=>{filmColor=filmColorInput.value;syncLook()};filmOpacityInput.oninput=()=>{filmOpacity=+filmOpacityInput.value;syncLook()};grainOpacityInput.oninput=()=>{grainOpacity=+grainOpacityInput.value;syncLook()};syncLook();
-
-function addRollLine(parent,lineText,lineIndex){const line=document.createElement('div');line.className='roll-line';[...lineText].forEach((ch,i)=>{const holder=document.createElement('span');holder.className='roll-char';holder.style.setProperty('--i',i+lineIndex*20);const current=document.createElement('span'),next=document.createElement('span');current.className='roll-current';next.className='roll-next';current.textContent=ch===' '?'\u00a0':ch;next.textContent=ch===' '?'\u00a0':ch;holder.append(current,next);line.append(holder)});parent.append(line);}
-const textRenderBeforeGrid=renderText;
-renderText=function(){
-  textOverlay.style.setProperty('--text-size',`${textSize}vw`);textOverlay.style.setProperty('--text-color',textColor);textOverlay.style.setProperty('--text-font',textFont);
-  if(!textValue.trim()){textRenderBeforeGrid();return;}
-  if(textStyle==='roll'&&mode==='flip'){
-    textOverlay.innerHTML='';textOverlay.className='text-overlay tile-text';const grid=document.createElement('div');grid.className='tile-text-grid';
-    for(let i=0;i<cols*rows;i++){const x=i%cols,y=Math.floor(i/cols),cell=document.createElement('div'),inner=document.createElement('div');cell.className='tile-text-cell';cell.style.setProperty('--safe-delay',`${delayFor(i,x,y)}s`);inner.className='tile-text-inner';inner.style.setProperty('--tx',x);inner.style.setProperty('--ty',y);inner.textContent=textValue;cell.append(inner);grid.append(cell);}textOverlay.append(grid);scheduleTextWindow();return;
-  }
-  if(textStyle==='roll'){
-    textOverlay.innerHTML='';textOverlay.className='text-overlay roll';const lines=textValue.split('\n');const wrap=document.createElement('div');lines.forEach((line,i)=>addRollLine(wrap,line,i));textOverlay.append(wrap);scheduleTextWindow();return;
-  }
-  textRenderBeforeGrid();const overlayText=textOverlay.querySelector('.overlay-text');if(overlayText)overlayText.style.whiteSpace='pre-line';scheduleTextWindow();
-};
-
-const renderBeforeCleanup=render;
-render=function(){
-  renderBeforeCleanup();
-  // Remove the obsolete hidden front/back cards so only the active grid remains.
-  stage.querySelectorAll('.flip-tile').forEach(tile=>tile.remove());
-  syncLook();
-};
-render();
-</script>
-<script>
-const EXPORT_VERSION='v2026.08.25.08';const exportBadge=document.querySelector('.build-version');if(exportBadge)exportBadge.textContent=`BUILD ${EXPORT_VERSION}`;
-async function exportVideoHQ(){
-  const button=document.querySelector('#export'),bar=document.querySelector('#progress'),fill=bar.querySelector('i'),type=mime();
-  if(!type){alert('이 브라우저에서는 영상 녹화를 지원하지 않습니다. 최신 Safari 또는 Chrome에서 다시 시도해주세요.');return;}
-  button.disabled=true;bar.style.display='block';fill.style.width='0%';
-  const canvas=document.createElement('canvas');canvas.width=ratio===.5625?1080:ratio===1.7778?1920:1080;canvas.height=ratio===1.7778?1080:ratio===.5625?1920:ratio===.8?1350:1080;
-  const ctx=canvas.getContext('2d'),stream=canvas.captureStream(30),rec=new MediaRecorder(stream,{mimeType:type,videoBitsPerSecond:12000000}),chunks=[];
-  rec.ondataavailable=e=>e.data.size&&chunks.push(e.data);const done=new Promise(resolve=>rec.onstop=resolve);rec.start(100);
-  const from=new Image(),to=new Image();from.crossOrigin='anonymous';to.crossOrigin='anonymous';from.src=photos[active%photos.length].url;to.src=photos[(active+1)%photos.length].url;await Promise.all([from.decode().catch(()=>{}),to.decode().catch(()=>{})]);
-  const duration=5200/speed,frames=Math.max(30,Math.round(duration/33)),cellW=canvas.width/cols,cellH=canvas.height/rows;
-  for(let f=0;f<frames;f++){
-    ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#17211e';ctx.fillRect(0,0,canvas.width,canvas.height);fitImage(ctx,from,canvas.width,canvas.height);
-    const p=f/(frames-1),reveal=Math.min(1,p*1.35);
-    for(let i=0;i<cols*rows;i++){const x=i%cols,y=Math.floor(i/cols),d=Math.min(1,delayFor(i,x,y)/1.3),local=Math.max(0,Math.min(1,(reveal-d)/(1-d)));if(local>0){ctx.save();ctx.globalAlpha=local;ctx.beginPath();ctx.rect(x*cellW,y*cellH,cellW+.5,cellH+.5);ctx.clip();fitImage(ctx,to,canvas.width,canvas.height);ctx.restore();}}
-    if(filmOpacity>0){ctx.save();ctx.globalAlpha=filmOpacity;ctx.fillStyle=filmColor;ctx.fillRect(0,0,canvas.width,canvas.height);ctx.restore();}
-    if(grainOpacity>0){ctx.save();ctx.globalAlpha=grainOpacity*.22;for(let n=0;n<420;n++){ctx.fillStyle=Math.random()>.5?'#fff':'#000';ctx.fillRect(Math.random()*canvas.width,Math.random()*canvas.height,1,1);}ctx.restore();}
-    if(textValue.trim()&&p>=textStart/(duration/1000)&&p<Math.min(1,(textStart+textDuration)/(duration/1000))){ctx.save();ctx.fillStyle=textColor;ctx.font=`800 ${Math.max(24,Math.round(canvas.width*textSize/100))}px ${textFont}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowColor='#0009';ctx.shadowBlur=16;ctx.fillText(textValue.split('\n')[0],canvas.width/2,canvas.height/2);ctx.restore();}
-    fill.style.width=`${Math.round((f+1)/frames*100)}%`;await new Promise(r=>setTimeout(r,33));
-  }
-  rec.stop();await done;const blob=new Blob(chunks,{type}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`mosaic-motion-${Date.now()}.${type.startsWith('video/mp4')?'mp4':'webm'}`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);button.disabled=false;setTimeout(()=>bar.style.display='none',800);
-}
-document.querySelector('#export').onclick=exportVideoHQ;
-</script>
-<script>
-const TIMELINE_VERSION='v2026.08.25.09';const timelineBadge=document.querySelector('.build-version');if(timelineBadge)timelineBadge.textContent=`BUILD ${TIMELINE_VERSION}`;
-let sequenceStartedAt=performance.now(),globalTextTimers=[];
-function scheduleGlobalTextWindow(){
-  globalTextTimers.forEach(clearTimeout);globalTextTimers=[];
-  if(!textValue.trim()){textOverlay.style.opacity='';return;}
-  const elapsed=(performance.now()-sequenceStartedAt)/1000,start=textStart,end=textStart+textDuration;
-  const reveal=()=>{textOverlay.style.opacity='1';textOverlay.classList.remove('text-enter');void textOverlay.offsetWidth;textOverlay.classList.add('text-enter');};
-  const hide=()=>{textOverlay.style.opacity='0';};
-  if(elapsed<start){hide();globalTextTimers.push(setTimeout(reveal,(start-elapsed)*1000));globalTextTimers.push(setTimeout(hide,(end-elapsed)*1000));}
-  else if(elapsed<end){reveal();globalTextTimers.push(setTimeout(hide,(end-elapsed)*1000));}
-  else hide();
-}
-scheduleTextWindow=scheduleGlobalTextWindow;
-document.querySelector('#play').addEventListener('click',()=>{if(playing){sequenceStartedAt=performance.now();scheduleGlobalTextWindow();}});
-thumbs.addEventListener('click',event=>{if(event.target.closest('.thumb')&&!event.target.closest('.thumb-remove')){sequenceStartedAt=performance.now();scheduleGlobalTextWindow();}},true);
-render();
-</script>
-<style>
-.text-overlay.roll>div{display:flex;flex-direction:column;align-items:center;gap:calc(var(--text-leading,1.2) * .25em);}
-.text-overlay.roll .roll-line{display:flex;overflow:visible;line-height:var(--text-leading,1.2);}
-.tile-text-inner{line-height:var(--text-leading,1.2);}
-.leading-controls{display:grid;gap:8px;padding-top:4px;}
-.leading-controls input[type=range]{width:150px;accent-color:#8ea63e;}
-@media(max-width:720px){.leading-controls input[type=range]{width:135px;}}
-</style>
-<script>
-const LEADING_VERSION='v2026.08.25.10';const leadingBadge=document.querySelector('.build-version');if(leadingBadge)leadingBadge.textContent=`BUILD ${LEADING_VERSION}`;
-let textLineHeight=1.2;
-const leadingBox=document.createElement('div');leadingBox.className='leading-controls';leadingBox.innerHTML=`<div class="row"><span>행간</span><span><input id="textLineHeight" type="range" min=".8" max="2" step=".05" value="1.2"><span class="look-value" id="textLineHeightValue">1.20</span></span></div>`;document.querySelector('.text-controls').append(leadingBox);
-const textLineHeightInput=document.querySelector('#textLineHeight');
-function syncTextLeading(){textOverlay.style.setProperty('--text-leading',textLineHeight);textOverlay.querySelectorAll('.roll-line,.tile-text-inner').forEach(el=>el.style.lineHeight=textLineHeight);}
-textLineHeightInput.oninput=()=>{textLineHeight=+textLineHeightInput.value;document.querySelector('#textLineHeightValue').textContent=textLineHeight.toFixed(2);syncTextLeading()};
-const renderBeforeLeading=renderText;
-renderText=function(){renderBeforeLeading();syncTextLeading();const wrapper=textOverlay.querySelector('.text-overlay.roll>div');if(wrapper)wrapper.style.display='flex';};
-render();
-</script>
-<style>
-.save-status{margin-left:10px;color:#8ea63e;font-size:9px;letter-spacing:.06em;white-space:nowrap;}
-@media(max-width:720px){.save-status{font-size:8px;margin-left:6px;}}
-</style>
-<script>
-const SAVE_VERSION='v2026.08.25.11';const saveBadge=document.querySelector('.build-version');if(saveBadge)saveBadge.textContent=`BUILD ${SAVE_VERSION}`;
-const saveStatus=document.createElement('span');saveStatus.className='save-status';saveStatus.textContent='기기 자동 저장';document.querySelector('.top').append(saveStatus);
-const DB_NAME='mosaic-motion-projects',DB_VERSION=1,DB_STORE='project';let projectDb,saveTimer;
-function openProjectDb(){return new Promise((resolve,reject)=>{if(!window.indexedDB){reject(new Error('IndexedDB unavailable'));return}const req=indexedDB.open(DB_NAME,DB_VERSION);req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains(DB_STORE))req.result.createObjectStore(DB_STORE)};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)});}
-async function writeProject(){
-  if(!projectDb)return;const photoRecords=photos.map(p=>({name:p.name,url:p.demo?p.url:null,blob:p.file||null,demo:!!p.demo}));
-  const data={photos:photoRecords,active,ratio,mode,speed,cols,squareGrid,textValue,textStyle,textFont,textSize,textColor,textStart,textDuration,textLineHeight,filmColor,filmOpacity,grainOpacity,updatedAt:Date.now()};
-  try{await new Promise((resolve,reject)=>{const tx=projectDb.transaction(DB_STORE,'readwrite');tx.objectStore(DB_STORE).put(data,'current');tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});saveStatus.textContent='자동 저장됨';}catch(e){saveStatus.textContent='저장 공간 확인 필요';}
-}
-function queueProjectSave(){clearTimeout(saveTimer);saveStatus.textContent='저장 중…';saveTimer=setTimeout(writeProject,450);}
-async function restoreProject(){
-  try{projectDb=await openProjectDb();const data=await new Promise((resolve,reject)=>{const tx=projectDb.transaction(DB_STORE,'readonly'),req=tx.objectStore(DB_STORE).get('current');req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)});if(!data||!data.photos?.length){queueProjectSave();return;}
-    photos=data.photos.map(p=>p.blob?{url:URL.createObjectURL(p.blob),name:p.name,file:p.blob,demo:false}:{url:p.url,name:p.name,demo:!!p.demo});active=Math.min(data.active||0,photos.length-1);ratio=data.ratio||ratio;mode=data.mode||mode;speed=data.speed||speed;cols=data.cols||cols;squareGrid=!!data.squareGrid;textValue=data.textValue||'';textStyle=data.textStyle||textStyle;textFont=data.textFont||textFont;textSize=data.textSize||textSize;textColor=data.textColor||textColor;textStart=data.textStart??textStart;textDuration=data.textDuration??textDuration;textLineHeight=data.textLineHeight??textLineHeight;filmColor=data.filmColor||filmColor;filmOpacity=data.filmOpacity??filmOpacity;grainOpacity=data.grainOpacity??grainOpacity;
-    document.querySelector('#ratio').value=String(ratio);document.querySelector('#mode').value=mode;document.querySelector('#density').value=squareGrid?'square':String(cols);document.querySelector('#caption').value=textValue;document.querySelector('#font').value=textFont;document.querySelector('#textSize').value=textSize;document.querySelector('#textColor').value=textColor;document.querySelector('#textMode').value=textStyle;if(document.querySelector('#textStart'))document.querySelector('#textStart').value=textStart;if(document.querySelector('#textDuration'))document.querySelector('#textDuration').value=textDuration;if(document.querySelector('#textLineHeight'))document.querySelector('#textLineHeight').value=textLineHeight;if(document.querySelector('#filmColor'))document.querySelector('#filmColor').value=filmColor;if(document.querySelector('#filmOpacity'))document.querySelector('#filmOpacity').value=filmOpacity;if(document.querySelector('#grainOpacity'))document.querySelector('#grainOpacity').value=grainOpacity;
-    render();await rebuildCrops();autoplay();saveStatus.textContent='저장된 작업 복원됨';
-  }catch(e){saveStatus.textContent='기기 자동 저장';}
-}
-photos.forEach(p=>{if(!p.file&&!p.demo)p.demo=true});
-document.querySelector('#files').onchange=async e=>{const fs=[...e.target.files].filter(f=>f.type.startsWith('image/'));if(!fs.length)return;const customPhotos=photos.filter(p=>!p.demo);if(!customPhotos.length)photos=[];photos=[...photos,...fs.map(f=>({url:URL.createObjectURL(f),name:f.name,file:f,demo:false}))];active=Math.max(0,photos.length-fs.length);await rebuildCrops();render();autoplay();queueProjectSave();e.target.value='';};
-['#caption','#font','#textSize','#textColor','#textMode','#ratio','#mode','#density','#filmColor','#filmOpacity','#grainOpacity','#textStart','#textDuration','#textLineHeight'].forEach(sel=>{const el=document.querySelector(sel);if(el)el.addEventListener('input',queueProjectSave),el.addEventListener('change',queueProjectSave)});
-thumbs.addEventListener('click',()=>queueProjectSave());
-window.addEventListener('pagehide',()=>{clearTimeout(saveTimer);writeProject()});
-restoreProject();
-</script>
-<style>
-.text-controls textarea#caption{width:100%;min-height:72px;resize:vertical;border:1px solid var(--line);background:#fff8;padding:10px;color:var(--ink);font:16px/1.5 Arial,Helvetica,sans-serif;white-space:pre-wrap;}
-</style>
-<script>
-const MULTILINE_VERSION='v2026.08.25.12';const multilineBadge=document.querySelector('.build-version');if(multilineBadge)multilineBadge.textContent=`BUILD ${MULTILINE_VERSION}`;
-let captionField=document.querySelector('#caption');
-if(captionField&&captionField.tagName==='INPUT'){
-  const area=document.createElement('textarea');area.id='caption';area.name=captionField.name||'caption';area.placeholder=captionField.placeholder;area.value=captionField.value;area.setAttribute('aria-label','전환 텍스트');area.rows=2;captionField.replaceWith(area);captionField=area;
-}
-captionField.removeAttribute('maxlength');captionField.oninput=()=>{textValue=captionField.value;renderText();queueProjectSave();};
-captionField.addEventListener('keydown',event=>{if(event.key==='Enter'){event.stopPropagation();setTimeout(()=>{textValue=captionField.value;renderText();queueProjectSave()},0);}});
-render();
-</script>
-<style>
-.film-overlay{z-index:2!important;background:transparent!important;opacity:1!important;}
-.film-overlay::before{content:"";position:absolute;inset:0;background:var(--film-color,#263b34);opacity:var(--film-opacity,0);mix-blend-mode:multiply;}
-.film-overlay::after{opacity:var(--grain-opacity,0)!important;}
-.meta{z-index:3;}
-.text-overlay{z-index:4;}
-</style>
-<script>
-const STABLE_TEXT_VERSION='v2026.08.25.13';const stableTextBadge=document.querySelector('.build-version');if(stableTextBadge)stableTextBadge.textContent=`BUILD ${STABLE_TEXT_VERSION}`;
-function syncLookStable(){filmLayer.style.setProperty('--film-color',filmColor);filmLayer.style.setProperty('--film-opacity',filmOpacity);filmLayer.style.setProperty('--grain-opacity',grainOpacity);filmLayer.style.backgroundColor='transparent';filmLayer.style.opacity='1';document.querySelector('#filmOpacityValue').textContent=`${Math.round(filmOpacity*100)}%`;document.querySelector('#grainOpacityValue').textContent=`${Math.round(grainOpacity/.45*100)}%`;}
-syncLook=syncLookStable;syncLookStable();
-let lastTextKey='',lastTextWindowState='';
-function scheduleGlobalTextStable(){
-  globalTextTimers.forEach(clearTimeout);globalTextTimers=[];
-  if(!textValue.trim()){textOverlay.style.opacity='';lastTextWindowState='';return;}
-  const elapsed=(performance.now()-sequenceStartedAt)/1000,start=textStart,end=textStart+textDuration;
-  const state=elapsed<start?'before':elapsed<end?'visible':'after';
-  if(state===lastTextWindowState&&state==='visible')return;
-  lastTextWindowState=state;
-  const reveal=()=>{textOverlay.style.opacity='1';textOverlay.classList.remove('text-enter');void textOverlay.offsetWidth;textOverlay.classList.add('text-enter');};
-  const hide=()=>{textOverlay.style.opacity='0';};
-  if(state==='before'){hide();globalTextTimers.push(setTimeout(reveal,(start-elapsed)*1000));globalTextTimers.push(setTimeout(hide,(end-elapsed)*1000));}
-  else if(state==='visible'){reveal();globalTextTimers.push(setTimeout(hide,(end-elapsed)*1000));}
-  else hide();
-}
-scheduleTextWindow=scheduleGlobalTextStable;
-function retimeLongRoll(){let n=0;textOverlay.querySelectorAll('.roll-char .roll-current,.roll-char .roll-next').forEach(el=>{el.style.animationDelay=`${Math.min(n++*.018,.55)}s`;});}
-const renderTextStableBefore=renderText;
-renderText=function(){
-  const key=[textValue,textStyle,mode==='flip'?'flip':'plain',textFont,textSize,textColor,textLineHeight].join('|');
-  const shouldKeep=key===lastTextKey&&mode!=='flip'&&textOverlay.children.length;
-  if(shouldKeep){syncTextLeading();retimeLongRoll();scheduleGlobalTextStable();return;}
-  lastTextKey=key;lastTextWindowState='';renderTextStableBefore();syncTextLeading();retimeLongRoll();scheduleGlobalTextStable();
-};
-render();
-</script>
-<style>
-.text-overlay .roll-line,.text-overlay .overlay-text,.tile-text-inner{font-size:var(--text-size,5vw)!important;}
-.size-value{color:#8ea63e;font-variant-numeric:tabular-nums;}
-</style>
-<script>
-const SIZE_VERSION='v2026.08.25.14';const sizeBadge=document.querySelector('.build-version');if(sizeBadge)sizeBadge.textContent=`BUILD ${SIZE_VERSION}`;
-const sizeInput=document.querySelector('#textSize');const sizeRow=sizeInput?.closest('.row');if(sizeRow&&!sizeRow.querySelector('.size-value')){const value=document.createElement('span');value.className='size-value';value.id='textSizeValue';value.textContent=`${textSize.toFixed(1)}vw`;sizeRow.append(value);}
-function applyTextSize(){const value=`${textSize}vw`;stage.style.setProperty('--text-size',value);textOverlay.style.setProperty('--text-size',value);textOverlay.querySelectorAll('.roll-line,.overlay-text,.tile-text-inner').forEach(el=>{el.style.fontSize=value;});const output=document.querySelector('#textSizeValue');if(output)output.textContent=value;}
-sizeInput.oninput=()=>{textSize=+sizeInput.value;applyTextSize();renderText();queueProjectSave();};
-applyTextSize();
-</script>
-<style>
-.text-overlay .roll-line,.text-overlay .overlay-text,.tile-text-inner{letter-spacing:var(--text-tracking,-.02em);}
-.text-overlay .roll-line,.text-overlay .overlay-text,.tile-text-grid{opacity:var(--text-alpha,1);}
-.text-overlay .roll-line,.text-overlay .overlay-text{position:relative;transform:translate(calc((var(--text-x,50) - 50) * 1%),calc((var(--text-y,50) - 50) * 1%));}
-.tile-text-inner{transform:translate(calc((var(--text-x,50) - 50) * 1%),calc((var(--text-y,50) - 50) * 1%));}
-.text-position-controls{display:grid;gap:8px;padding-top:4px;}
-.text-position-controls input[type=range]{width:145px;accent-color:#8ea63e;}
-.text-position-controls .text-value{color:#8ea63e;font-variant-numeric:tabular-nums;}
-@media(max-width:720px){.text-position-controls input[type=range]{width:130px;}}
-</style>
-<script>
-const TEXT_EDIT_VERSION='v2026.08.25.15';const textEditBadge=document.querySelector('.build-version');if(textEditBadge)textEditBadge.textContent=`BUILD ${TEXT_EDIT_VERSION}`;
-let textLetterSpacing=-.02,textX=50,textY=50,textOpacity=1;
-const positionBox=document.createElement('div');positionBox.className='text-position-controls';positionBox.innerHTML=`<div class="row"><span>자간</span><span><input id="textLetterSpacing" type="range" min="-.08" max=".2" step=".01" value="-.02"><span class="text-value" id="textLetterSpacingValue">-0.02em</span></span></div><div class="row"><span>가로 위치</span><span><input id="textX" type="range" min="0" max="100" step="1" value="50"><span class="text-value" id="textXValue">50%</span></span></div><div class="row"><span>세로 위치</span><span><input id="textY" type="range" min="0" max="100" step="1" value="50"><span class="text-value" id="textYValue">50%</span></span></div><div class="row"><span>글자 투명도</span><span><input id="textOpacity" type="range" min="0" max="1" step=".01" value="1"><span class="text-value" id="textOpacityValue">100%</span></span></div>`;document.querySelector('.text-controls').append(positionBox);
-const textLetterInput=document.querySelector('#textLetterSpacing'),textXInput=document.querySelector('#textX'),textYInput=document.querySelector('#textY'),textOpacityInput=document.querySelector('#textOpacity');
-function applyTextLayout(){textOverlay.style.setProperty('--text-tracking',`${textLetterSpacing}em`);textOverlay.style.setProperty('--text-x',textX);textOverlay.style.setProperty('--text-y',textY);textOverlay.style.setProperty('--text-alpha',textOpacity);document.querySelector('#textLetterSpacingValue').textContent=`${textLetterSpacing.toFixed(2)}em`;document.querySelector('#textXValue').textContent=`${textX}%`;document.querySelector('#textYValue').textContent=`${textY}%`;document.querySelector('#textOpacityValue').textContent=`${Math.round(textOpacity*100)}%`;}
-function restartTextTimeline(){sequenceStartedAt=performance.now();lastTextWindowState='';renderText();scheduleGlobalTextStable();queueProjectSave();}
-textLetterInput.oninput=()=>{textLetterSpacing=+textLetterInput.value;applyTextLayout();restartTextTimeline()};textXInput.oninput=()=>{textX=+textXInput.value;applyTextLayout();restartTextTimeline()};textYInput.oninput=()=>{textY=+textYInput.value;applyTextLayout();restartTextTimeline()};textOpacityInput.oninput=()=>{textOpacity=+textOpacityInput.value;applyTextLayout();restartTextTimeline()};
-captionField.addEventListener('input',restartTextTimeline);
-document.querySelector('#textMode').addEventListener('change',restartTextTimeline);document.querySelector('#font').addEventListener('change',restartTextTimeline);document.querySelector('#textColor').addEventListener('input',restartTextTimeline);
-const textLayoutRenderBefore=renderText;renderText=function(){textLayoutRenderBefore();applyTextLayout();};
-applyTextLayout();render();
-</script>
-<script>
-const EXPORT_FIX_VERSION='v2026.08.25.16';const exportFixBadge=document.querySelector('.build-version');if(exportFixBadge)exportFixBadge.textContent=`BUILD ${EXPORT_FIX_VERSION}`;
-function loadVideoImage(source){return new Promise((resolve,reject)=>{const img=new Image();if(/^https?:/i.test(source))img.crossOrigin='anonymous';img.onload=()=>img.naturalWidth?resolve(img):reject(new Error('empty image'));img.onerror=()=>reject(new Error('image load failed'));img.src=source;});}
-async function exportVideoFixed(){
-  const button=document.querySelector('#export'),bar=document.querySelector('#progress'),fill=bar.querySelector('i'),type=mime();if(!type){alert('이 브라우저에서는 영상 녹화를 지원하지 않습니다.');return;}
-  button.disabled=true;bar.style.display='block';fill.style.width='0%';
-  try{
-    const fromPhoto=photos[active%photos.length],toPhoto=photos[(active+1)%photos.length];await rebuildCrops();
-    const from=await loadVideoImage(fromPhoto.displayUrl||fromPhoto.url),to=await loadVideoImage(toPhoto.displayUrl||toPhoto.url);
-    const canvas=document.createElement('canvas');canvas.width=ratio===.5625?1080:ratio===1.7778?1920:1080;canvas.height=ratio===1.7778?1080:ratio===.5625?1920:ratio===.8?1350:1080;
-    const ctx=canvas.getContext('2d'),stream=canvas.captureStream(30),rec=new MediaRecorder(stream,{mimeType:type,videoBitsPerSecond:12000000}),chunks=[];rec.ondataavailable=e=>e.data.size&&chunks.push(e.data);const done=new Promise(resolve=>rec.onstop=resolve);rec.start(100);
-    const duration=5200/speed,frames=Math.max(30,Math.round(duration/33)),cellW=canvas.width/cols,cellH=canvas.height/rows;
-    for(let f=0;f<frames;f++){
-      ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#17211e';ctx.fillRect(0,0,canvas.width,canvas.height);fitImage(ctx,from,canvas.width,canvas.height);const p=f/(frames-1),reveal=Math.min(1,p*1.35);
-      for(let i=0;i<cols*rows;i++){const x=i%cols,y=Math.floor(i/cols),d=Math.min(1,delayFor(i,x,y)/1.3),local=Math.max(0,Math.min(1,(reveal-d)/(1-d)));if(local>0){ctx.save();ctx.globalAlpha=local;ctx.beginPath();ctx.rect(x*cellW,y*cellH,cellW+.5,cellH+.5);ctx.clip();fitImage(ctx,to,canvas.width,canvas.height);ctx.restore();}}
-      if(filmOpacity>0){ctx.save();ctx.globalAlpha=filmOpacity;ctx.fillStyle=filmColor;ctx.fillRect(0,0,canvas.width,canvas.height);ctx.restore();}
-      if(grainOpacity>0){ctx.save();ctx.globalAlpha=grainOpacity*.22;for(let n=0;n<420;n++){ctx.fillStyle=Math.random()>.5?'#fff':'#000';ctx.fillRect(Math.random()*canvas.width,Math.random()*canvas.height,1,1);}ctx.restore();}
-      const elapsed=p*(duration/1000);if(textValue.trim()&&elapsed>=textStart&&elapsed<textStart+textDuration){ctx.save();ctx.globalAlpha=textOpacity;ctx.fillStyle=textColor;ctx.font=`800 ${Math.max(24,Math.round(canvas.width*textSize/100))}px ${textFont}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowColor='#0009';ctx.shadowBlur=16;const lines=textValue.split('\n'),lineGap=Math.max(30,Math.round(canvas.width*textSize/100*textLineHeight)),baseY=canvas.height*textY/100-(lines.length-1)*lineGap/2;lines.forEach((line,i)=>ctx.fillText(line,canvas.width*textX/100,baseY+i*lineGap));ctx.restore();}
-      fill.style.width=`${Math.round((f+1)/frames*100)}%`;await new Promise(r=>setTimeout(r,33));
-    }
-    rec.stop();await done;const blob=new Blob(chunks,{type}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`mosaic-motion-${Date.now()}.${type.startsWith('video/mp4')?'mp4':'webm'}`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
-  }catch(error){alert('사진을 영상으로 불러오지 못했습니다. 사진을 다시 추가한 뒤 시도해주세요.');}
-  button.disabled=false;setTimeout(()=>bar.style.display='none',800);
-}
-document.querySelector('#export').onclick=exportVideoFixed;
-</script>
-<style>
-.play{right:26px!important;bottom:26px!important;width:44px;height:44px;z-index:8;}
-.note{left:24px;bottom:28px!important;}
-@media(max-width:720px){.stagebox{padding-bottom:18px;}.play{right:24px!important;bottom:30px!important;}.note{left:24px;bottom:32px!important;}}
-</style>
-<script>
-const BUTTON_VERSION='v2026.08.25.17';const buttonBadge=document.querySelector('.build-version');if(buttonBadge)buttonBadge.textContent=`BUILD ${BUTTON_VERSION}`;
-</script>
-<style>
-.backup-controls{display:flex;gap:8px;margin-top:10px;}
-.backup-controls button{flex:1;border:1px solid var(--line);background:#fff;color:var(--ink);padding:9px 7px;font-size:10px;font-weight:700;}
-.backup-controls input{display:none;}
-@media(max-width:720px){
-  .thumbs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;overflow:visible;}
-  .thumb{width:auto;height:auto;aspect-ratio:1;flex:none;}
-}
-</style>
-<script>
-const BACKUP_VERSION='v2026.08.25.19';const backupBadge=document.querySelector('.build-version');if(backupBadge)backupBadge.textContent=`BUILD ${BACKUP_VERSION}`;
-const backupBox=document.createElement('div');backupBox.className='backup-controls';backupBox.innerHTML='<button id="backupExport" type="button">작업 백업 저장</button><label><button id="backupImportButton" type="button">백업 복원</button><input id="backupImport" type="file" accept="application/json,.json"></label>';document.querySelector('#export').after(backupBox);
-function readBlobAsDataURL(blob){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(reader.error);reader.readAsDataURL(blob);});}
-async function photoToDataURL(photo){if(photo.file)return readBlobAsDataURL(photo.file);if(photo.url.startsWith('data:'))return photo.url;const response=await fetch(photo.url);return readBlobAsDataURL(await response.blob());}
-async function createBackup(){
-  const records=[];for(const photo of photos){try{records.push({name:photo.name,dataUrl:await photoToDataURL(photo),demo:false});}catch(e){records.push({name:photo.name,url:photo.url,demo:!!photo.demo});}}
-  return {app:'mosaic-motion',version:BACKUP_VERSION,createdAt:new Date().toISOString(),photos:records,settings:{active,ratio,mode,speed,cols,squareGrid,textValue,textStyle,textFont,textSize,textColor,textStart,textDuration,textLineHeight,textLetterSpacing,textX,textY,textOpacity,filmColor,filmOpacity,grainOpacity}};
-}
-function dataURLToBlob(dataUrl){const [head,body]=dataUrl.split(',');const bytes=atob(body);const out=new Uint8Array(bytes.length);for(let i=0;i<bytes.length;i++)out[i]=bytes.charCodeAt(i);return new Blob([out],{type:(head.match(/data:(.*?);/)||[])[1]||'image/jpeg'});}
-backupBox.querySelector('#backupExport').onclick=async()=>{const button=backupBox.querySelector('#backupExport');button.disabled=true;button.textContent='백업 생성 중…';try{const backup=await createBackup(),blob=new Blob([JSON.stringify(backup)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`mosaic-motion-backup-${Date.now()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);saveStatus.textContent='백업 파일 저장됨';}catch(e){alert('백업 파일을 만들지 못했습니다.');}button.disabled=false;button.textContent='작업 백업 저장';};
-backupBox.querySelector('#backupImportButton').onclick=()=>backupBox.querySelector('#backupImport').click();
-backupBox.querySelector('#backupImport').onchange=async event=>{const file=event.target.files?.[0];if(!file)return;try{const data=JSON.parse(await file.text());if(data.app!=='mosaic-motion'||!Array.isArray(data.photos))throw new Error('invalid backup');photos=await Promise.all(data.photos.map(async p=>{if(p.dataUrl){const blob=dataURLToBlob(p.dataUrl);return {url:URL.createObjectURL(blob),file:blob,name:p.name,demo:false};}return {url:p.url,name:p.name,demo:!!p.demo};}));const s=data.settings||{};active=Math.min(s.active||0,Math.max(0,photos.length-1));ratio=s.ratio||ratio;mode=s.mode||mode;speed=s.speed||speed;cols=s.cols||cols;squareGrid=!!s.squareGrid;textValue=s.textValue||'';textStyle=s.textStyle||textStyle;textFont=s.textFont||textFont;textSize=s.textSize||textSize;textColor=s.textColor||textColor;textStart=s.textStart??textStart;textDuration=s.textDuration??textDuration;textLineHeight=s.textLineHeight??textLineHeight;textLetterSpacing=s.textLetterSpacing??textLetterSpacing;textX=s.textX??textX;textY=s.textY??textY;textOpacity=s.textOpacity??textOpacity;filmColor=s.filmColor||filmColor;filmOpacity=s.filmOpacity??filmOpacity;grainOpacity=s.grainOpacity??grainOpacity;document.querySelector('#caption').value=textValue;document.querySelector('#ratio').value=String(ratio);document.querySelector('#mode').value=mode;document.querySelector('#density').value=squareGrid?'square':String(cols);render();await rebuildCrops();autoplay();queueProjectSave();saveStatus.textContent='백업 복원됨';event.target.value='';}catch(e){alert('백업 파일을 읽지 못했습니다. Mosaic Motion에서 저장한 JSON 파일인지 확인해주세요.');}};
-
-async function loadSequenceImage(photo){return loadVideoImage(photo.displayUrl||photo.url);}
-async function exportAllPhotos(){
-  const button=document.querySelector('#export'),bar=document.querySelector('#progress'),fill=bar.querySelector('i'),type=mime();if(!type){alert('이 브라우저에서는 영상 녹화를 지원하지 않습니다.');return;}
-  button.disabled=true;bar.style.display='block';fill.style.width='0%';let rec;
-  try{
-    const canvas=document.createElement('canvas');canvas.width=ratio===.5625?1080:ratio===1.7778?1920:1080;canvas.height=ratio===1.7778?1080:ratio===.5625?1920:ratio===.8?1350:1080;const ctx=canvas.getContext('2d'),stream=canvas.captureStream(30);rec=new MediaRecorder(stream,{mimeType:type,videoBitsPerSecond:12000000});const chunks=[];rec.ondataavailable=e=>e.data.size&&chunks.push(e.data);const done=new Promise(resolve=>rec.onstop=resolve);rec.start(100);
-    const segmentDuration=5200/speed,segmentFrames=Math.max(30,Math.round(segmentDuration/33)),totalFrames=segmentFrames*photos.length,cellW=canvas.width/cols,cellH=canvas.height/rows;
-    for(let photoIndex=0;photoIndex<photos.length;photoIndex++){const from=await loadSequenceImage(photos[photoIndex]),to=await loadSequenceImage(photos[(photoIndex+1)%photos.length]);for(let f=0;f<segmentFrames;f++){ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#17211e';ctx.fillRect(0,0,canvas.width,canvas.height);fitImage(ctx,from,canvas.width,canvas.height);const p=f/(segmentFrames-1),reveal=Math.min(1,p*1.35);for(let i=0;i<cols*rows;i++){const x=i%cols,y=Math.floor(i/cols),d=Math.min(1,delayFor(i,x,y)/1.3),local=Math.max(0,Math.min(1,(reveal-d)/(1-d)));if(local>0){ctx.save();ctx.globalAlpha=local;ctx.beginPath();ctx.rect(x*cellW,y*cellH,cellW+.5,cellH+.5);ctx.clip();fitImage(ctx,to,canvas.width,canvas.height);ctx.restore();}}if(filmOpacity>0){ctx.save();ctx.globalAlpha=filmOpacity;ctx.fillStyle=filmColor;ctx.fillRect(0,0,canvas.width,canvas.height);ctx.restore();}if(grainOpacity>0){ctx.save();ctx.globalAlpha=grainOpacity*.22;for(let n=0;n<420;n++){ctx.fillStyle=Math.random()>.5?'#fff':'#000';ctx.fillRect(Math.random()*canvas.width,Math.random()*canvas.height,1,1);}ctx.restore();}const elapsed=(photoIndex*segmentDuration+f*33)/1000;if(textValue.trim()&&elapsed>=textStart&&elapsed<textStart+textDuration){ctx.save();ctx.globalAlpha=textOpacity;ctx.fillStyle=textColor;ctx.font=`800 ${Math.max(24,Math.round(canvas.width*textSize/100))}px ${textFont}`;ctx.textAlign='center';ctx.textBaseline='middle';const lines=textValue.split('\n'),gap=Math.max(30,Math.round(canvas.width*textSize/100*textLineHeight)),base=canvas.height*textY/100-(lines.length-1)*gap/2;lines.forEach((line,j)=>ctx.fillText(line,canvas.width*textX/100,base+j*gap));ctx.restore();}fill.style.width=`${Math.round((photoIndex*segmentFrames+f+1)/totalFrames*100)}%`;await new Promise(r=>setTimeout(r,33));}}rec.stop();await done;const blob=new Blob(chunks,{type}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`mosaic-motion-${Date.now()}.${type.startsWith('video/mp4')?'mp4':'webm'}`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
-  }catch(e){try{rec?.stop()}catch(_){ }alert('사진 전체를 영상으로 불러오지 못했습니다. 백업을 먼저 저장한 뒤 사진을 다시 복원해보세요.');}button.disabled=false;setTimeout(()=>bar.style.display='none',800);
-}
-document.querySelector('#export').onclick=exportAllPhotos;
-</script></body></html>
+</body>
+</html>
