@@ -1183,4 +1183,28 @@ saveMotionBlob=function(blob,type){
 render();autoplay();
 </script>
 
-</body></html>
+
+<style id="mosaic-motion-export-grid-v31">
+/* Export-only grid: visible enough to read as a puzzle, restrained enough to keep the completed photograph intact. */
+</style>
+<script>
+const MOTION_EXPORT_GRID_V31='v2026.08.25.31';
+const motionV31Badge=document.querySelector('.build-version');
+if(motionV31Badge)motionV31Badge.textContent='BUILD '+MOTION_EXPORT_GRID_V31;
+const v31DrawMotionLook=drawMotionLook;
+function drawMotionExportGrid(ctx,width,height){
+  const lineWidth=Math.max(1.25,width/720);
+  ctx.save();
+  ctx.strokeStyle='rgba(8,15,12,.42)';
+  ctx.lineWidth=lineWidth;
+  ctx.translate(.5*lineWidth,.5*lineWidth);
+  for(let x=1;x<cols;x++){const px=x*width/cols;ctx.beginPath();ctx.moveTo(px,0);ctx.lineTo(px,height);ctx.stroke();}
+  for(let y=1;y<rows;y++){const py=y*height/rows;ctx.beginPath();ctx.moveTo(0,py);ctx.lineTo(width,py);ctx.stroke();}
+  ctx.restore();
+}
+drawMotionLook=function(ctx,width,height){
+  v31DrawMotionLook(ctx,width,height);
+  drawMotionExportGrid(ctx,width,height);
+};
+</script>
+\n</body></html>
