@@ -41,6 +41,9 @@ async function exportVideo(){const button=document.querySelector('#export'),bar=
   .text-overlay .roll-line{font-size:clamp(24px,8vw,58px);line-height:1.22;letter-spacing:-.025em;}
   .text-overlay .roll-char{height:1.22em;}
   .text-controls .row{align-items:center;}
+  /* iOS Safari zooms controls whose font-size is below 16px. */
+  .settings select,.text-controls select,.text-controls input[type=text]{font-size:16px;}
+  .speed button{font-size:16px;}
 }
 </style>
 <script>
@@ -81,7 +84,22 @@ function decorateThumbs(){
 const originalRender=render;
 render=function(){originalRender();decorateThumbs();};
 render();
+</script>
+<script>
+// Guarantee a clean, undistorted full-image state after the tile flip finishes.
+let flipSettleTimer;
+const decoratedRender=render;
+render=function(){
+  clearTimeout(flipSettleTimer);
+  decoratedRender();
+  if(mode==='flip'&&photos.length>1){
+    const next=photos[(active+1)%photos.length];
+    flipSettleTimer=setTimeout(()=>{
+      backdrop.style.backgroundImage=`url("${next.displayUrl||next.url}")`;
+      stage.querySelectorAll('.flip-tile').forEach(tile=>tile.remove());
+    },2150);
+  }
+};
+render();
 </script></body></html>
-
-
 
