@@ -18,8 +18,70 @@ async function rebuildCrops(){const target=ratio;await Promise.all(photos.map(as
 function mime(){const types=['video/mp4;codecs="avc1.42E01E"','video/mp4','video/webm;codecs=vp9','video/webm'];return types.find(t=>window.MediaRecorder&&MediaRecorder.isTypeSupported(t))||''}
 function fitImage(ctx,img,w,h){const scale=Math.max(w/img.width,h/img.height),iw=img.width*scale,ih=img.height*scale;ctx.drawImage(img,(w-iw)/2,(h-ih)/2,iw,ih)}
 async function exportVideo(){const button=document.querySelector('#export'),bar=document.querySelector('#progress'),fill=bar.querySelector('i');const type=mime();if(!type){alert('이 브라우저에서는 영상 녹화를 지원하지 않습니다. 최신 Safari 또는 Chrome에서 다시 시도해주세요.');return}button.disabled=true;bar.style.display='block';fill.style.width='0%';const canvas=document.createElement('canvas');canvas.width=ratio===.5625?608:1080;canvas.height=ratio===1.7778?608:ratio===.5625?1080:ratio===.8?1350:1080;const ctx=canvas.getContext('2d'),stream=canvas.captureStream(30),rec=new MediaRecorder(stream,{mimeType:type,videoBitsPerSecond:7000000}),chunks=[];rec.ondataavailable=e=>e.data.size&&chunks.push(e.data);const done=new Promise(resolve=>rec.onstop=resolve);rec.start(100);const duration=5200/speed,frames=Math.max(30,Math.round(duration/33));for(let f=0;f<frames;f++){const from=new Image(),to=new Image();from.crossOrigin='anonymous';to.crossOrigin='anonymous';from.src=photos[active%photos.length].url;to.src=photos[(active+1)%photos.length].url;await Promise.all([from.decode().catch(()=>{}),to.decode().catch(()=>{})]);ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#17211e';ctx.fillRect(0,0,canvas.width,canvas.height);fitImage(ctx,from,canvas.width,canvas.height);const p=f/(frames-1);const reveal=Math.min(1,p*1.35);const cellW=canvas.width/cols,cellH=canvas.height/rows;for(let i=0;i<cols*rows;i++){const x=i%cols,y=Math.floor(i/cols),d=Math.min(1,delayFor(i,x,y)/1.3),local=Math.max(0,Math.min(1,(reveal-d)/(1-d)));if(local>0){ctx.save();ctx.globalAlpha=local;ctx.beginPath();ctx.rect(x*cellW,y*cellH,cellW+.5,cellH+.5);ctx.clip();fitImage(ctx,to,canvas.width,canvas.height);ctx.restore()}}fill.style.width=`${Math.round((f+1)/frames*100)}%`;await new Promise(r=>setTimeout(r,33))}rec.stop();await done;const blob=new Blob(chunks,{type});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`mosaic-motion-${Date.now()}.${type.startsWith('video/mp4')?'mp4':'webm'}`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);button.disabled=false;setTimeout(()=>bar.style.display='none',800)}document.querySelector('#export').onclick=exportVideo;render();rebuildCrops();autoplay();
-</script></body></html>
+</script>
+<style>
+/* Mobile editing polish and interaction fixes */
+.flip-back{transform:rotateY(180deg)!important;}
+.text-controls #textColor{width:54px;height:34px;padding:3px;border:1px solid var(--line);border-radius:8px;background:#fff;}
+.text-controls input[type=range]{width:150px;accent-color:#8ea63e;}
+.text-controls .row{gap:12px;min-height:34px;}
+.text-overlay .roll-line{line-height:1.16;letter-spacing:-.025em;}
+.text-overlay .roll-char{height:1.16em;}
+.text-overlay.roll .roll-char span{animation:textRollIn .8s cubic-bezier(.16,.8,.35,1) both;}
+.thumb{overflow:visible;}
+.thumb-remove{position:absolute;right:-6px;top:-7px;width:20px;height:20px;border:1px solid #fff;background:#17211e;color:#d8ef79;border-radius:50%;font-size:14px;line-height:16px;padding:0;z-index:3;}
+.stagebox{position:sticky;top:16px;align-self:start;}
+.hero h1{line-height:1.12;letter-spacing:-.045em;}
+.intro{line-height:1.95;}
+@media(max-width:720px){
+  .stagebox{top:0;padding:10px 0 12px;background:var(--paper);z-index:20;}
+  .hero h1{font-size:clamp(34px,9.5vw,50px);line-height:1.18;letter-spacing:-.045em;}
+  .intro{font-size:13px;line-height:1.9;}
+  .text-overlay{padding:24px;}
+  .text-overlay .roll-line{font-size:clamp(24px,8vw,58px);line-height:1.22;letter-spacing:-.025em;}
+  .text-overlay .roll-char{height:1.22em;}
+  .text-controls .row{align-items:center;}
+}
+</style>
+<script>
+// Add the mobile controls that were missing from the first version.
+const captionInput=document.querySelector('#caption');
+captionInput.removeAttribute('maxlength');
+captionInput.placeholder='예: 여름의 조각들 · 원하는 만큼 입력';
 
+const fontSelect=document.querySelector('#font');
+const extraFonts=[
+  ['Pretendard, sans-serif','Pretendard'],
+  ['Inter, sans-serif','Inter'],
+  ['Manrope, sans-serif','Manrope'],
+  ['Plus Jakarta Sans, sans-serif','Plus Jakarta Sans'],
+  ['Montserrat, sans-serif','Montserrat'],
+  ['Gowun Dodum, sans-serif','Gowun Dodum'],
+  ['Nanum Gothic, sans-serif','Nanum Gothic'],
+  ['Black Han Sans, sans-serif','Black Han Sans'],
+  ['Nanum Myeongjo, serif','Nanum Myeongjo']
+];
+extraFonts.forEach(([value,label])=>{if(![...fontSelect.options].some(o=>o.value===value)){const o=document.createElement('option');o.value=value;o.textContent=label;fontSelect.append(o)}});
+const fontLink=document.createElement('link');fontLink.rel='stylesheet';fontLink.href='https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Gowun+Dodum&family=Inter:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&family=Nanum+Gothic:wght@400;700&family=Nanum+Myeongjo:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap';document.head.append(fontLink);
+
+document.querySelector('.eyebrow').textContent='PHOTO / MOTION / 01';
+document.querySelector('.hero h1').innerHTML='장면 사이에<br><em>움직임을 더하다.</em>';
+document.querySelector('.intro').textContent='사진을 고르고, 조각의 리듬을 설계하세요.';
+document.querySelector('#export').textContent='MP4로 저장해 보세요';
+document.querySelector('.tip').textContent='사진은 기기에서만 처리됩니다. 원본 비율은 유지되고 넘치는 부분만 잘립니다.';
+
+function decorateThumbs(){
+  thumbs.querySelectorAll('.thumb').forEach((button,index)=>{
+    if(button.querySelector('.thumb-remove'))return;
+    const remove=document.createElement('button');remove.type='button';remove.className='thumb-remove';remove.setAttribute('aria-label',`${index+1}번 사진 삭제`);remove.textContent='×';
+    remove.onclick=(event)=>{event.preventDefault();event.stopPropagation();if(photos.length<=1){alert('사진은 최소 1장 이상 남겨주세요.');return}const removed=photos.splice(index,1)[0];if(removed.url.startsWith('blob:'))URL.revokeObjectURL(removed.url);if(active>=photos.length)active=photos.length-1;render();autoplay()};
+    button.append(remove);
+  });
+}
+const originalRender=render;
+render=function(){originalRender();decorateThumbs();};
+render();
+</script></body></html>
 
 
 
