@@ -296,4 +296,23 @@ scheduleTextWindow=scheduleGlobalTextWindow;
 document.querySelector('#play').addEventListener('click',()=>{if(playing){sequenceStartedAt=performance.now();scheduleGlobalTextWindow();}});
 thumbs.addEventListener('click',event=>{if(event.target.closest('.thumb')&&!event.target.closest('.thumb-remove')){sequenceStartedAt=performance.now();scheduleGlobalTextWindow();}},true);
 render();
+</script>
+<style>
+.text-overlay.roll>div{display:flex;flex-direction:column;align-items:center;gap:calc(var(--text-leading,1.2) * .25em);}
+.text-overlay.roll .roll-line{display:flex;overflow:visible;line-height:var(--text-leading,1.2);}
+.tile-text-inner{line-height:var(--text-leading,1.2);}
+.leading-controls{display:grid;gap:8px;padding-top:4px;}
+.leading-controls input[type=range]{width:150px;accent-color:#8ea63e;}
+@media(max-width:720px){.leading-controls input[type=range]{width:135px;}}
+</style>
+<script>
+const LEADING_VERSION='v2026.08.25.10';const leadingBadge=document.querySelector('.build-version');if(leadingBadge)leadingBadge.textContent=`BUILD ${LEADING_VERSION}`;
+let textLineHeight=1.2;
+const leadingBox=document.createElement('div');leadingBox.className='leading-controls';leadingBox.innerHTML=`<div class="row"><span>행간</span><span><input id="textLineHeight" type="range" min=".8" max="2" step=".05" value="1.2"><span class="look-value" id="textLineHeightValue">1.20</span></span></div>`;document.querySelector('.text-controls').append(leadingBox);
+const textLineHeightInput=document.querySelector('#textLineHeight');
+function syncTextLeading(){textOverlay.style.setProperty('--text-leading',textLineHeight);textOverlay.querySelectorAll('.roll-line,.tile-text-inner').forEach(el=>el.style.lineHeight=textLineHeight);}
+textLineHeightInput.oninput=()=>{textLineHeight=+textLineHeightInput.value;document.querySelector('#textLineHeightValue').textContent=textLineHeight.toFixed(2);syncTextLeading()};
+const renderBeforeLeading=renderText;
+renderText=function(){renderBeforeLeading();syncTextLeading();const wrapper=textOverlay.querySelector('.text-overlay.roll>div');if(wrapper)wrapper.style.display='flex';};
+render();
 </script></body></html>
