@@ -756,4 +756,39 @@ drawMosaicTransition=function(ctx,from,to,width,height,timeMs){
 };
 render();autoplay();
 </script>
+
+<style id="mosaic-motion-mobile-flip">
+/* One GPU plane per cell for iPhone Safari: fixed grid, 3D hinge, normal-facing source on both sides. */
+.stage.flip .flip-safe{perspective:none!important;transform-style:flat!important;-webkit-transform-style:flat!important;backface-visibility:hidden!important;-webkit-backface-visibility:hidden!important;will-change:transform,filter;animation:motionSingleFaceFlip var(--single-flip-duration,1.75s) cubic-bezier(.2,.72,.22,1) both!important;animation-delay:var(--safe-delay,0s)!important;}
+.stage.flip .motion-flip-card{display:none!important;}
+@keyframes motionSingleFaceFlip{0%,10%{transform:rotateY(0deg);filter:none}46%{transform:rotateY(76deg);filter:brightness(.72)}54%{transform:rotateY(-76deg);filter:brightness(.72)}90%,100%{transform:rotateY(0deg);filter:none}}
+</style>
+<script>
+const MOTION_MOBILE_FLIP_VERSION='v2026.08.25.25';
+const motionMobileBadge=document.querySelector('.build-version');
+if(motionMobileBadge)motionMobileBadge.textContent='BUILD '+MOTION_MOBILE_FLIP_VERSION;
+function renderMotionMobileFlip(){
+  clearMotionLayers();
+  renderBaseForMotionOutput();
+  if(typeof decorateThumbs==='function')decorateThumbs();
+  stage.querySelectorAll('.flip-tile,.flip-final').forEach(node=>node.remove());
+  if(mode!=='flip'||photos.length<2)return;
+  const currentPhoto=photos[active%photos.length],nextPhoto=photos[(active+1)%photos.length];
+  const currentUrl=currentPhoto.displayUrl||currentPhoto.url,nextUrl=nextPhoto.displayUrl||nextPhoto.url;
+  const speedValue=Number(speed)||1;
+  stage.style.setProperty('--single-flip-duration',(CARD_FLIP_MS/speedValue)+'ms');
+  for(let i=0;i<cols*rows;i++){
+    const x=i%cols,y=Math.floor(i/cols),tile=document.createElement('div');
+    const delay=delayFor(i,x,y)*CARD_DELAY_SCALE/speedValue;
+    tile.className='flip-safe';
+    tile.style.setProperty('--safe-delay',delay+'s');
+    tile.style.backgroundImage='url("'+currentUrl+'")';
+    tile.style.backgroundPosition=(cols===1?0:x/(cols-1)*100)+'% '+(rows===1?0:y/(rows-1)*100)+'%';
+    stage.append(tile);
+    motionTileTimers.push(setTimeout(()=>{tile.style.backgroundImage='url("'+nextUrl+'")';},Math.round(delay*1000+(CARD_FLIP_MS/speedValue)*.5)));
+  }
+}
+render=renderMotionMobileFlip;
+render();autoplay();
+</script>
 </body></html>
